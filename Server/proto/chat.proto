@@ -1,10 +1,8 @@
 syntax = "proto3";
 
-import "google/protobuf/timestamp.proto";
-
 option java_multiple_files = true;
 option java_package = "com.mwojnar.gen";
-option java_outer_classname = "Chat";
+option java_outer_classname = "ChatProto";
 
 package chat;
 
@@ -22,7 +20,7 @@ message Message {
   uint64 userId = 4;
   Priority priority = 5;
   string text = 6;
-  google.protobuf.Timestamp time = 7;
+  uint64 time = 7;
   optional bytes media = 8;
   optional string mime = 9;
 }
@@ -38,7 +36,7 @@ message JoinResponse {
   repeated Message messages = 1;
 }
 
-service StreamTester {
+service Chat {
   rpc SendMessage(stream Message) returns (stream Message) {}
   rpc Join(UserInfo) returns (JoinResponse) {}
 }
