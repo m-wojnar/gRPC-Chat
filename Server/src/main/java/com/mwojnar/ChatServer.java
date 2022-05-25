@@ -4,6 +4,9 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
@@ -11,9 +14,10 @@ import java.util.logging.Logger;
 public class ChatServer {
     public static final int DEFAULT_PORT = 50051;
     public static final int DEFAULT_THREADS_NUM = 16;
+    public static final String CONNECTION_STRING = "jdbc:sqlite:resources/chat.db";
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        final var server = new ChatServer(DEFAULT_PORT);
+    public static void main(String[] args) throws IOException, InterruptedException, SQLException {
+        final var server = new ChatServer();
         server.start();
         server.blockUntilShutdown();
     }
@@ -21,23 +25,71 @@ public class ChatServer {
     private final Logger logger;
     private final Server server;
     private final int port;
+    private final Connection connection;
 
-    public ChatServer(int port, int nThreads) {
-        this.port = port;
+    public ChatServer(int port, int nThreads) throws SQLException {
         this.logger = Logger.getLogger(ChatServer.class.getName());
+
+        try {
+            this.connection = DriverManager.getConnection(CONNECTION_STRING);
+            this.logger.info("Server connected to database.");
+        } catch (SQLException e) {
+            this.logger.warning("Server couldn't connect to database.");
+            throw e;
+        }
+
+        try {
+            createTables();
+        } catch (SQLException e) {
+            this.logger.warning("Server couldn't create database tables.");
+            throw e;
+        }
+
+        this.port = port;
         this.server = ServerBuilder
                 .forPort(port)
                 .executor(Executors.newFixedThreadPool(nThreads))
-                .addService(new ChatImpl())
+                .addService(new ChatImpl(logger, connection))
                 .build();
     }
 
-    public ChatServer(int port) {
+    public ChatServer(int port) throws SQLException {
         this(port, DEFAULT_THREADS_NUM);
     }
 
-    public ChatServer() {
+    public ChatServer() throws SQLException {
         this(DEFAULT_PORT);
+    }
+
+    private void createTables() throws SQLException {
+        var statement = this.connection.createStatement();
+        statement.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS groups (
+                        group_id  INTEGER PRIMARY KEY,
+                        last_id   INTEGER DEFAULT 0 NOT NULL
+                    );
+                """);
+        statement.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS users (
+                        user_id   INTEGER PRIMARY KEY,
+                        group_id  INTEGER REFERENCES groups (group_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
+                        ack_id    INTEGER
+                    );
+                """);
+        statement.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS messages (
+                        message_id  INTEGER PRIMARY KEY,
+                        reply_id    INTEGER,
+                        ack_id      INTEGER,
+                        user_id     INTEGER REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
+                        group_id    INTEGER REFERENCES groups (group_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
+                        priority    INTEGER NOT NULL,
+                        text        TEXT NOT NULL,
+                        time        INTEGER NOT NULL,
+                        media       BLOB,
+                        mime        TEXT
+                    );
+                """);
     }
 
     private void start() throws IOException {
@@ -45,15 +97,25 @@ public class ChatServer {
         this.logger.info("Server started, listening on " + this.port);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            this.logger.info("Shutting down server.");
-            this.stop();
-            this.logger.info("Server shut down.");
+            try {
+                this.stop();
+            } catch (SQLException e) {
+                this.logger.warning("Server couldn't close database connection.");
+                System.out.println(e.getMessage());
+            }
         }));
     }
 
-    private void stop() {
+    private void stop() throws SQLException {
+        if (this.connection != null) {
+            this.connection.close();
+            this.logger.info("Database connection closed.");
+        }
+
         if (this.server != null) {
+            this.logger.info("Shutting down server.");
             this.server.shutdown();
+            this.logger.info("Server shut down.");
         }
     }
 

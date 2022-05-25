@@ -4,3 +4,6 @@
 # build files
 out/
 target/
+
+# database
+chat.db
