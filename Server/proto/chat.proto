@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+option java_package = "com.mwojnar.gen";
+option java_outer_classname = "Chat";
+
+package chat;
+
+enum Priority {
+  HIGH = 0;
+  MEDIUM = 1;
+  NORMAL = 2;
+  LOW = 3;
+}
+
+message Message {
+  optional uint64 id = 1;
+  optional uint64 replyId = 2;
+  optional uint64 ackId = 3;
+  uint64 userId = 4;
+  Priority priority = 5;
+  string text = 6;
+  google.protobuf.Timestamp time = 7;
+  optional bytes media = 8;
+  optional string mime = 9;
+}
+
+message UserInfo {
+  uint64 userId = 1;
+  uint64 groupId = 2;
+  optional uint64 ackId = 3;
+  string nick = 4;
+}
+
+message JoinResponse {
+  repeated Message messages = 1;
+}
+
+service StreamTester {
+  rpc SendMessage(stream Message) returns (stream Message) {}
+  rpc Join(UserInfo) returns (JoinResponse) {}
+}
