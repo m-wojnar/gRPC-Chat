@@ -44,15 +44,15 @@ public final class ChatProto {
       "ity\030\005 \001(\0162\016.chat.Priority\022\014\n\004text\030\006 \001(\t\022" +
       "\014\n\004time\030\007 \001(\004\022\022\n\005media\030\010 \001(\014H\003\210\001\001\022\021\n\004mim" +
       "e\030\t \001(\tH\004\210\001\001B\005\n\003_idB\n\n\010_replyIdB\010\n\006_ackI" +
-      "dB\010\n\006_mediaB\007\n\005_mime\"W\n\010UserInfo\022\016\n\006user" +
+      "dB\010\n\006_mediaB\007\n\005_mime\"I\n\010UserInfo\022\016\n\006user" +
       "Id\030\001 \001(\004\022\017\n\007groupId\030\002 \001(\004\022\022\n\005ackId\030\003 \001(\004" +
-      "H\000\210\001\001\022\014\n\004nick\030\004 \001(\tB\010\n\006_ackId\"/\n\014JoinRes" +
-      "ponse\022\037\n\010messages\030\001 \003(\0132\r.chat.Message*5" +
-      "\n\010Priority\022\010\n\004HIGH\020\000\022\n\n\006MEDIUM\020\001\022\n\n\006NORM" +
-      "AL\020\002\022\007\n\003LOW\020\0032g\n\004Chat\0221\n\013SendMessage\022\r.c" +
-      "hat.Message\032\r.chat.Message\"\000(\0010\001\022,\n\004Join" +
-      "\022\016.chat.UserInfo\032\022.chat.JoinResponse\"\000B\036" +
-      "\n\017com.mwojnar.genB\tChatProtoP\001b\006proto3"
+      "H\000\210\001\001B\010\n\006_ackId\"/\n\014JoinResponse\022\037\n\010messa" +
+      "ges\030\001 \003(\0132\r.chat.Message*5\n\010Priority\022\010\n\004" +
+      "HIGH\020\000\022\n\n\006MEDIUM\020\001\022\n\n\006NORMAL\020\002\022\007\n\003LOW\020\0032" +
+      "g\n\004Chat\0221\n\013SendMessage\022\r.chat.Message\032\r." +
+      "chat.Message\"\000(\0010\001\022,\n\004Join\022\016.chat.UserIn" +
+      "fo\032\022.chat.JoinResponse\"\000B\036\n\017com.mwojnar." +
+      "genB\tChatProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -69,7 +69,7 @@ public final class ChatProto {
     internal_static_chat_UserInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_chat_UserInfo_descriptor,
-        new java.lang.String[] { "UserId", "GroupId", "AckId", "Nick", "AckId", });
+        new java.lang.String[] { "UserId", "GroupId", "AckId", "AckId", });
     internal_static_chat_JoinResponse_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_chat_JoinResponse_fieldAccessorTable = new

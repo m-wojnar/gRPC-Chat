@@ -29,7 +29,6 @@ message UserInfo {
   uint64 userId = 1;
   uint64 groupId = 2;
   optional uint64 ackId = 3;
-  string nick = 4;
 }
 
 message JoinResponse {

@@ -16,7 +16,6 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private UserInfo() {
-    nick_ = "";
   }
 
   @java.lang.Override
@@ -63,12 +62,6 @@ private static final long serialVersionUID = 0L;
           case 24: {
             bitField0_ |= 0x00000001;
             ackId_ = input.readUInt64();
-            break;
-          }
-          case 34: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            nick_ = s;
             break;
           }
           default: {
@@ -145,44 +138,6 @@ private static final long serialVersionUID = 0L;
     return ackId_;
   }
 
-  public static final int NICK_FIELD_NUMBER = 4;
-  private volatile java.lang.Object nick_;
-  /**
-   * <code>string nick = 4;</code>
-   * @return The nick.
-   */
-  @java.lang.Override
-  public java.lang.String getNick() {
-    java.lang.Object ref = nick_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      nick_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string nick = 4;</code>
-   * @return The bytes for nick.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getNickBytes() {
-    java.lang.Object ref = nick_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      nick_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -206,9 +161,6 @@ private static final long serialVersionUID = 0L;
     if (((bitField0_ & 0x00000001) != 0)) {
       output.writeUInt64(3, ackId_);
     }
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nick_)) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 4, nick_);
-    }
     unknownFields.writeTo(output);
   }
 
@@ -229,9 +181,6 @@ private static final long serialVersionUID = 0L;
     if (((bitField0_ & 0x00000001) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeUInt64Size(3, ackId_);
-    }
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nick_)) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, nick_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -257,8 +206,6 @@ private static final long serialVersionUID = 0L;
       if (getAckId()
           != other.getAckId()) return false;
     }
-    if (!getNick()
-        .equals(other.getNick())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -281,8 +228,6 @@ private static final long serialVersionUID = 0L;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getAckId());
     }
-    hash = (37 * hash) + NICK_FIELD_NUMBER;
-    hash = (53 * hash) + getNick().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -422,8 +367,6 @@ private static final long serialVersionUID = 0L;
 
       ackId_ = 0L;
       bitField0_ = (bitField0_ & ~0x00000001);
-      nick_ = "";
-
       return this;
     }
 
@@ -458,7 +401,6 @@ private static final long serialVersionUID = 0L;
         result.ackId_ = ackId_;
         to_bitField0_ |= 0x00000001;
       }
-      result.nick_ = nick_;
       result.bitField0_ = to_bitField0_;
       onBuilt();
       return result;
@@ -516,10 +458,6 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasAckId()) {
         setAckId(other.getAckId());
-      }
-      if (!other.getNick().isEmpty()) {
-        nick_ = other.nick_;
-        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -648,82 +586,6 @@ private static final long serialVersionUID = 0L;
     public Builder clearAckId() {
       bitField0_ = (bitField0_ & ~0x00000001);
       ackId_ = 0L;
-      onChanged();
-      return this;
-    }
-
-    private java.lang.Object nick_ = "";
-    /**
-     * <code>string nick = 4;</code>
-     * @return The nick.
-     */
-    public java.lang.String getNick() {
-      java.lang.Object ref = nick_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        nick_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string nick = 4;</code>
-     * @return The bytes for nick.
-     */
-    public com.google.protobuf.ByteString
-        getNickBytes() {
-      java.lang.Object ref = nick_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        nick_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string nick = 4;</code>
-     * @param value The nick to set.
-     * @return This builder for chaining.
-     */
-    public Builder setNick(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      nick_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string nick = 4;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearNick() {
-      
-      nick_ = getDefaultInstance().getNick();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string nick = 4;</code>
-     * @param value The bytes for nick to set.
-     * @return This builder for chaining.
-     */
-    public Builder setNickBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      nick_ = value;
       onChanged();
       return this;
     }

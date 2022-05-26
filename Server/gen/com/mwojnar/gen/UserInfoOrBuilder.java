@@ -29,16 +29,4 @@ public interface UserInfoOrBuilder extends
    * @return The ackId.
    */
   long getAckId();
-
-  /**
-   * <code>string nick = 4;</code>
-   * @return The nick.
-   */
-  java.lang.String getNick();
-  /**
-   * <code>string nick = 4;</code>
-   * @return The bytes for nick.
-   */
-  com.google.protobuf.ByteString
-      getNickBytes();
 }
