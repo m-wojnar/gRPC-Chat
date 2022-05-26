@@ -88,6 +88,8 @@ public class ChatServer {
                         mime        TEXT
                     );
                 """);
+
+        logger.info("Created missing tables.");
     }
 
     private void start() throws IOException {

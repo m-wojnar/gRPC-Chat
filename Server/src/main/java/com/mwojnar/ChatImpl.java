@@ -174,6 +174,8 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
                         .stream()
                         .filter(entry -> entry.getKey() != message.getUserId())
                         .forEach(entry -> entry.getValue().onNext(response.build()));
+
+                logger.info(String.format("Received message %d from user %d and send to other users.", newMessageId, message.getUserId()));
             }
 
             private long saveMessage(Message message) throws SQLException {
@@ -241,6 +243,8 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
                 } catch (SQLException e) {
                     logger.warning("Couldn't remove old messages from group " + groupId + ".");
                 }
+
+                logger.info("User " + userId + " disconnected.");
             }
 
             private void removeUser(long userId) throws SQLException {
