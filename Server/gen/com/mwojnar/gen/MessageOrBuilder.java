@@ -41,7 +41,12 @@ public interface MessageOrBuilder extends
   long getAckId();
 
   /**
-   * <code>uint64 userId = 4;</code>
+   * <code>optional uint64 userId = 4;</code>
+   * @return Whether the userId field is set.
+   */
+  boolean hasUserId();
+  /**
+   * <code>optional uint64 userId = 4;</code>
    * @return The userId.
    */
   long getUserId();

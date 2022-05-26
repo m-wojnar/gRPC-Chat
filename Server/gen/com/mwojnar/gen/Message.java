@@ -69,7 +69,7 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 32: {
-
+            bitField0_ |= 0x00000008;
             userId_ = input.readUInt64();
             break;
           }
@@ -91,13 +91,13 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 66: {
-            bitField0_ |= 0x00000008;
+            bitField0_ |= 0x00000010;
             media_ = input.readBytes();
             break;
           }
           case 74: {
             java.lang.String s = input.readStringRequireUtf8();
-            bitField0_ |= 0x00000010;
+            bitField0_ |= 0x00000020;
             mime_ = s;
             break;
           }
@@ -194,7 +194,15 @@ private static final long serialVersionUID = 0L;
   public static final int USERID_FIELD_NUMBER = 4;
   private long userId_;
   /**
-   * <code>uint64 userId = 4;</code>
+   * <code>optional uint64 userId = 4;</code>
+   * @return Whether the userId field is set.
+   */
+  @java.lang.Override
+  public boolean hasUserId() {
+    return ((bitField0_ & 0x00000008) != 0);
+  }
+  /**
+   * <code>optional uint64 userId = 4;</code>
    * @return The userId.
    */
   @java.lang.Override
@@ -278,7 +286,7 @@ private static final long serialVersionUID = 0L;
    */
   @java.lang.Override
   public boolean hasMedia() {
-    return ((bitField0_ & 0x00000008) != 0);
+    return ((bitField0_ & 0x00000010) != 0);
   }
   /**
    * <code>optional bytes media = 8;</code>
@@ -297,7 +305,7 @@ private static final long serialVersionUID = 0L;
    */
   @java.lang.Override
   public boolean hasMime() {
-    return ((bitField0_ & 0x00000010) != 0);
+    return ((bitField0_ & 0x00000020) != 0);
   }
   /**
    * <code>optional string mime = 9;</code>
@@ -358,7 +366,7 @@ private static final long serialVersionUID = 0L;
     if (((bitField0_ & 0x00000004) != 0)) {
       output.writeUInt64(3, ackId_);
     }
-    if (userId_ != 0L) {
+    if (((bitField0_ & 0x00000008) != 0)) {
       output.writeUInt64(4, userId_);
     }
     if (priority_ != com.mwojnar.gen.Priority.HIGH.getNumber()) {
@@ -370,10 +378,10 @@ private static final long serialVersionUID = 0L;
     if (time_ != 0L) {
       output.writeUInt64(7, time_);
     }
-    if (((bitField0_ & 0x00000008) != 0)) {
+    if (((bitField0_ & 0x00000010) != 0)) {
       output.writeBytes(8, media_);
     }
-    if (((bitField0_ & 0x00000010) != 0)) {
+    if (((bitField0_ & 0x00000020) != 0)) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 9, mime_);
     }
     unknownFields.writeTo(output);
@@ -397,7 +405,7 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeUInt64Size(3, ackId_);
     }
-    if (userId_ != 0L) {
+    if (((bitField0_ & 0x00000008) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeUInt64Size(4, userId_);
     }
@@ -412,11 +420,11 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeUInt64Size(7, time_);
     }
-    if (((bitField0_ & 0x00000008) != 0)) {
+    if (((bitField0_ & 0x00000010) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeBytesSize(8, media_);
     }
-    if (((bitField0_ & 0x00000010) != 0)) {
+    if (((bitField0_ & 0x00000020) != 0)) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, mime_);
     }
     size += unknownFields.getSerializedSize();
@@ -449,8 +457,11 @@ private static final long serialVersionUID = 0L;
       if (getAckId()
           != other.getAckId()) return false;
     }
-    if (getUserId()
-        != other.getUserId()) return false;
+    if (hasUserId() != other.hasUserId()) return false;
+    if (hasUserId()) {
+      if (getUserId()
+          != other.getUserId()) return false;
+    }
     if (priority_ != other.priority_) return false;
     if (!getText()
         .equals(other.getText())) return false;
@@ -492,9 +503,11 @@ private static final long serialVersionUID = 0L;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getAckId());
     }
-    hash = (37 * hash) + USERID_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        getUserId());
+    if (hasUserId()) {
+      hash = (37 * hash) + USERID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getUserId());
+    }
     hash = (37 * hash) + PRIORITY_FIELD_NUMBER;
     hash = (53 * hash) + priority_;
     hash = (37 * hash) + TEXT_FIELD_NUMBER;
@@ -650,7 +663,7 @@ private static final long serialVersionUID = 0L;
       ackId_ = 0L;
       bitField0_ = (bitField0_ & ~0x00000004);
       userId_ = 0L;
-
+      bitField0_ = (bitField0_ & ~0x00000008);
       priority_ = 0;
 
       text_ = "";
@@ -658,9 +671,9 @@ private static final long serialVersionUID = 0L;
       time_ = 0L;
 
       media_ = com.google.protobuf.ByteString.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000008);
-      mime_ = "";
       bitField0_ = (bitField0_ & ~0x00000010);
+      mime_ = "";
+      bitField0_ = (bitField0_ & ~0x00000020);
       return this;
     }
 
@@ -701,16 +714,19 @@ private static final long serialVersionUID = 0L;
         result.ackId_ = ackId_;
         to_bitField0_ |= 0x00000004;
       }
-      result.userId_ = userId_;
+      if (((from_bitField0_ & 0x00000008) != 0)) {
+        result.userId_ = userId_;
+        to_bitField0_ |= 0x00000008;
+      }
       result.priority_ = priority_;
       result.text_ = text_;
       result.time_ = time_;
-      if (((from_bitField0_ & 0x00000008) != 0)) {
-        to_bitField0_ |= 0x00000008;
-      }
-      result.media_ = media_;
       if (((from_bitField0_ & 0x00000010) != 0)) {
         to_bitField0_ |= 0x00000010;
+      }
+      result.media_ = media_;
+      if (((from_bitField0_ & 0x00000020) != 0)) {
+        to_bitField0_ |= 0x00000020;
       }
       result.mime_ = mime_;
       result.bitField0_ = to_bitField0_;
@@ -771,7 +787,7 @@ private static final long serialVersionUID = 0L;
       if (other.hasAckId()) {
         setAckId(other.getAckId());
       }
-      if (other.getUserId() != 0L) {
+      if (other.hasUserId()) {
         setUserId(other.getUserId());
       }
       if (other.priority_ != 0) {
@@ -788,7 +804,7 @@ private static final long serialVersionUID = 0L;
         setMedia(other.getMedia());
       }
       if (other.hasMime()) {
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000020;
         mime_ = other.mime_;
         onChanged();
       }
@@ -941,7 +957,15 @@ private static final long serialVersionUID = 0L;
 
     private long userId_ ;
     /**
-     * <code>uint64 userId = 4;</code>
+     * <code>optional uint64 userId = 4;</code>
+     * @return Whether the userId field is set.
+     */
+    @java.lang.Override
+    public boolean hasUserId() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <code>optional uint64 userId = 4;</code>
      * @return The userId.
      */
     @java.lang.Override
@@ -949,22 +973,22 @@ private static final long serialVersionUID = 0L;
       return userId_;
     }
     /**
-     * <code>uint64 userId = 4;</code>
+     * <code>optional uint64 userId = 4;</code>
      * @param value The userId to set.
      * @return This builder for chaining.
      */
     public Builder setUserId(long value) {
-      
+      bitField0_ |= 0x00000008;
       userId_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>uint64 userId = 4;</code>
+     * <code>optional uint64 userId = 4;</code>
      * @return This builder for chaining.
      */
     public Builder clearUserId() {
-      
+      bitField0_ = (bitField0_ & ~0x00000008);
       userId_ = 0L;
       onChanged();
       return this;
@@ -1138,7 +1162,7 @@ private static final long serialVersionUID = 0L;
      */
     @java.lang.Override
     public boolean hasMedia() {
-      return ((bitField0_ & 0x00000008) != 0);
+      return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <code>optional bytes media = 8;</code>
@@ -1157,7 +1181,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000008;
+  bitField0_ |= 0x00000010;
       media_ = value;
       onChanged();
       return this;
@@ -1167,7 +1191,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearMedia() {
-      bitField0_ = (bitField0_ & ~0x00000008);
+      bitField0_ = (bitField0_ & ~0x00000010);
       media_ = getDefaultInstance().getMedia();
       onChanged();
       return this;
@@ -1179,7 +1203,7 @@ private static final long serialVersionUID = 0L;
      * @return Whether the mime field is set.
      */
     public boolean hasMime() {
-      return ((bitField0_ & 0x00000010) != 0);
+      return ((bitField0_ & 0x00000020) != 0);
     }
     /**
      * <code>optional string mime = 9;</code>
@@ -1224,7 +1248,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000010;
+  bitField0_ |= 0x00000020;
       mime_ = value;
       onChanged();
       return this;
@@ -1234,7 +1258,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearMime() {
-      bitField0_ = (bitField0_ & ~0x00000010);
+      bitField0_ = (bitField0_ & ~0x00000020);
       mime_ = getDefaultInstance().getMime();
       onChanged();
       return this;
@@ -1250,7 +1274,7 @@ private static final long serialVersionUID = 0L;
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000010;
+      bitField0_ |= 0x00000020;
       mime_ = value;
       onChanged();
       return this;

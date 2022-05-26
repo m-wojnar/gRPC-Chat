@@ -50,17 +50,17 @@ private static final long serialVersionUID = 0L;
             done = true;
             break;
           case 8: {
-
+            bitField0_ |= 0x00000001;
             userId_ = input.readUInt64();
             break;
           }
           case 16: {
-
+            bitField0_ |= 0x00000002;
             groupId_ = input.readUInt64();
             break;
           }
           case 24: {
-            bitField0_ |= 0x00000001;
+            bitField0_ |= 0x00000004;
             ackId_ = input.readUInt64();
             break;
           }
@@ -100,7 +100,15 @@ private static final long serialVersionUID = 0L;
   public static final int USERID_FIELD_NUMBER = 1;
   private long userId_;
   /**
-   * <code>uint64 userId = 1;</code>
+   * <code>optional uint64 userId = 1;</code>
+   * @return Whether the userId field is set.
+   */
+  @java.lang.Override
+  public boolean hasUserId() {
+    return ((bitField0_ & 0x00000001) != 0);
+  }
+  /**
+   * <code>optional uint64 userId = 1;</code>
    * @return The userId.
    */
   @java.lang.Override
@@ -111,7 +119,15 @@ private static final long serialVersionUID = 0L;
   public static final int GROUPID_FIELD_NUMBER = 2;
   private long groupId_;
   /**
-   * <code>uint64 groupId = 2;</code>
+   * <code>optional uint64 groupId = 2;</code>
+   * @return Whether the groupId field is set.
+   */
+  @java.lang.Override
+  public boolean hasGroupId() {
+    return ((bitField0_ & 0x00000002) != 0);
+  }
+  /**
+   * <code>optional uint64 groupId = 2;</code>
    * @return The groupId.
    */
   @java.lang.Override
@@ -127,7 +143,7 @@ private static final long serialVersionUID = 0L;
    */
   @java.lang.Override
   public boolean hasAckId() {
-    return ((bitField0_ & 0x00000001) != 0);
+    return ((bitField0_ & 0x00000004) != 0);
   }
   /**
    * <code>optional uint64 ackId = 3;</code>
@@ -152,13 +168,13 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (userId_ != 0L) {
+    if (((bitField0_ & 0x00000001) != 0)) {
       output.writeUInt64(1, userId_);
     }
-    if (groupId_ != 0L) {
+    if (((bitField0_ & 0x00000002) != 0)) {
       output.writeUInt64(2, groupId_);
     }
-    if (((bitField0_ & 0x00000001) != 0)) {
+    if (((bitField0_ & 0x00000004) != 0)) {
       output.writeUInt64(3, ackId_);
     }
     unknownFields.writeTo(output);
@@ -170,15 +186,15 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (userId_ != 0L) {
+    if (((bitField0_ & 0x00000001) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeUInt64Size(1, userId_);
     }
-    if (groupId_ != 0L) {
+    if (((bitField0_ & 0x00000002) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeUInt64Size(2, groupId_);
     }
-    if (((bitField0_ & 0x00000001) != 0)) {
+    if (((bitField0_ & 0x00000004) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeUInt64Size(3, ackId_);
     }
@@ -197,10 +213,16 @@ private static final long serialVersionUID = 0L;
     }
     com.mwojnar.gen.UserInfo other = (com.mwojnar.gen.UserInfo) obj;
 
-    if (getUserId()
-        != other.getUserId()) return false;
-    if (getGroupId()
-        != other.getGroupId()) return false;
+    if (hasUserId() != other.hasUserId()) return false;
+    if (hasUserId()) {
+      if (getUserId()
+          != other.getUserId()) return false;
+    }
+    if (hasGroupId() != other.hasGroupId()) return false;
+    if (hasGroupId()) {
+      if (getGroupId()
+          != other.getGroupId()) return false;
+    }
     if (hasAckId() != other.hasAckId()) return false;
     if (hasAckId()) {
       if (getAckId()
@@ -217,12 +239,16 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + USERID_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        getUserId());
-    hash = (37 * hash) + GROUPID_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        getGroupId());
+    if (hasUserId()) {
+      hash = (37 * hash) + USERID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getUserId());
+    }
+    if (hasGroupId()) {
+      hash = (37 * hash) + GROUPID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getGroupId());
+    }
     if (hasAckId()) {
       hash = (37 * hash) + ACKID_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
@@ -362,11 +388,11 @@ private static final long serialVersionUID = 0L;
     public Builder clear() {
       super.clear();
       userId_ = 0L;
-
-      groupId_ = 0L;
-
-      ackId_ = 0L;
       bitField0_ = (bitField0_ & ~0x00000001);
+      groupId_ = 0L;
+      bitField0_ = (bitField0_ & ~0x00000002);
+      ackId_ = 0L;
+      bitField0_ = (bitField0_ & ~0x00000004);
       return this;
     }
 
@@ -395,11 +421,17 @@ private static final long serialVersionUID = 0L;
       com.mwojnar.gen.UserInfo result = new com.mwojnar.gen.UserInfo(this);
       int from_bitField0_ = bitField0_;
       int to_bitField0_ = 0;
-      result.userId_ = userId_;
-      result.groupId_ = groupId_;
       if (((from_bitField0_ & 0x00000001) != 0)) {
-        result.ackId_ = ackId_;
+        result.userId_ = userId_;
         to_bitField0_ |= 0x00000001;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.groupId_ = groupId_;
+        to_bitField0_ |= 0x00000002;
+      }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.ackId_ = ackId_;
+        to_bitField0_ |= 0x00000004;
       }
       result.bitField0_ = to_bitField0_;
       onBuilt();
@@ -450,10 +482,10 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(com.mwojnar.gen.UserInfo other) {
       if (other == com.mwojnar.gen.UserInfo.getDefaultInstance()) return this;
-      if (other.getUserId() != 0L) {
+      if (other.hasUserId()) {
         setUserId(other.getUserId());
       }
-      if (other.getGroupId() != 0L) {
+      if (other.hasGroupId()) {
         setGroupId(other.getGroupId());
       }
       if (other.hasAckId()) {
@@ -491,7 +523,15 @@ private static final long serialVersionUID = 0L;
 
     private long userId_ ;
     /**
-     * <code>uint64 userId = 1;</code>
+     * <code>optional uint64 userId = 1;</code>
+     * @return Whether the userId field is set.
+     */
+    @java.lang.Override
+    public boolean hasUserId() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional uint64 userId = 1;</code>
      * @return The userId.
      */
     @java.lang.Override
@@ -499,22 +539,22 @@ private static final long serialVersionUID = 0L;
       return userId_;
     }
     /**
-     * <code>uint64 userId = 1;</code>
+     * <code>optional uint64 userId = 1;</code>
      * @param value The userId to set.
      * @return This builder for chaining.
      */
     public Builder setUserId(long value) {
-      
+      bitField0_ |= 0x00000001;
       userId_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>uint64 userId = 1;</code>
+     * <code>optional uint64 userId = 1;</code>
      * @return This builder for chaining.
      */
     public Builder clearUserId() {
-      
+      bitField0_ = (bitField0_ & ~0x00000001);
       userId_ = 0L;
       onChanged();
       return this;
@@ -522,7 +562,15 @@ private static final long serialVersionUID = 0L;
 
     private long groupId_ ;
     /**
-     * <code>uint64 groupId = 2;</code>
+     * <code>optional uint64 groupId = 2;</code>
+     * @return Whether the groupId field is set.
+     */
+    @java.lang.Override
+    public boolean hasGroupId() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>optional uint64 groupId = 2;</code>
      * @return The groupId.
      */
     @java.lang.Override
@@ -530,22 +578,22 @@ private static final long serialVersionUID = 0L;
       return groupId_;
     }
     /**
-     * <code>uint64 groupId = 2;</code>
+     * <code>optional uint64 groupId = 2;</code>
      * @param value The groupId to set.
      * @return This builder for chaining.
      */
     public Builder setGroupId(long value) {
-      
+      bitField0_ |= 0x00000002;
       groupId_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>uint64 groupId = 2;</code>
+     * <code>optional uint64 groupId = 2;</code>
      * @return This builder for chaining.
      */
     public Builder clearGroupId() {
-      
+      bitField0_ = (bitField0_ & ~0x00000002);
       groupId_ = 0L;
       onChanged();
       return this;
@@ -558,7 +606,7 @@ private static final long serialVersionUID = 0L;
      */
     @java.lang.Override
     public boolean hasAckId() {
-      return ((bitField0_ & 0x00000001) != 0);
+      return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <code>optional uint64 ackId = 3;</code>
@@ -574,7 +622,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setAckId(long value) {
-      bitField0_ |= 0x00000001;
+      bitField0_ |= 0x00000004;
       ackId_ = value;
       onChanged();
       return this;
@@ -584,7 +632,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearAckId() {
-      bitField0_ = (bitField0_ & ~0x00000001);
+      bitField0_ = (bitField0_ & ~0x00000004);
       ackId_ = 0L;
       onChanged();
       return this;

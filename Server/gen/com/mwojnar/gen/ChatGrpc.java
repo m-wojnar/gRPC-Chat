@@ -16,28 +16,28 @@ public final class ChatGrpc {
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.mwojnar.gen.Message,
-      com.mwojnar.gen.Message> getSendMessageMethod;
+      com.mwojnar.gen.Empty> getSendMessageMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "SendMessage",
       requestType = com.mwojnar.gen.Message.class,
-      responseType = com.mwojnar.gen.Message.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+      responseType = com.mwojnar.gen.Empty.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
   public static io.grpc.MethodDescriptor<com.mwojnar.gen.Message,
-      com.mwojnar.gen.Message> getSendMessageMethod() {
-    io.grpc.MethodDescriptor<com.mwojnar.gen.Message, com.mwojnar.gen.Message> getSendMessageMethod;
+      com.mwojnar.gen.Empty> getSendMessageMethod() {
+    io.grpc.MethodDescriptor<com.mwojnar.gen.Message, com.mwojnar.gen.Empty> getSendMessageMethod;
     if ((getSendMessageMethod = ChatGrpc.getSendMessageMethod) == null) {
       synchronized (ChatGrpc.class) {
         if ((getSendMessageMethod = ChatGrpc.getSendMessageMethod) == null) {
           ChatGrpc.getSendMessageMethod = getSendMessageMethod =
-              io.grpc.MethodDescriptor.<com.mwojnar.gen.Message, com.mwojnar.gen.Message>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+              io.grpc.MethodDescriptor.<com.mwojnar.gen.Message, com.mwojnar.gen.Empty>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SendMessage"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.mwojnar.gen.Message.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.mwojnar.gen.Message.getDefaultInstance()))
+                  com.mwojnar.gen.Empty.getDefaultInstance()))
               .setSchemaDescriptor(new ChatMethodDescriptorSupplier("SendMessage"))
               .build();
         }
@@ -47,28 +47,28 @@ public final class ChatGrpc {
   }
 
   private static volatile io.grpc.MethodDescriptor<com.mwojnar.gen.UserInfo,
-      com.mwojnar.gen.JoinResponse> getJoinMethod;
+      com.mwojnar.gen.Message> getJoinMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "Join",
       requestType = com.mwojnar.gen.UserInfo.class,
-      responseType = com.mwojnar.gen.JoinResponse.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+      responseType = com.mwojnar.gen.Message.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
   public static io.grpc.MethodDescriptor<com.mwojnar.gen.UserInfo,
-      com.mwojnar.gen.JoinResponse> getJoinMethod() {
-    io.grpc.MethodDescriptor<com.mwojnar.gen.UserInfo, com.mwojnar.gen.JoinResponse> getJoinMethod;
+      com.mwojnar.gen.Message> getJoinMethod() {
+    io.grpc.MethodDescriptor<com.mwojnar.gen.UserInfo, com.mwojnar.gen.Message> getJoinMethod;
     if ((getJoinMethod = ChatGrpc.getJoinMethod) == null) {
       synchronized (ChatGrpc.class) {
         if ((getJoinMethod = ChatGrpc.getJoinMethod) == null) {
           ChatGrpc.getJoinMethod = getJoinMethod =
-              io.grpc.MethodDescriptor.<com.mwojnar.gen.UserInfo, com.mwojnar.gen.JoinResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              io.grpc.MethodDescriptor.<com.mwojnar.gen.UserInfo, com.mwojnar.gen.Message>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "Join"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.mwojnar.gen.UserInfo.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.mwojnar.gen.JoinResponse.getDefaultInstance()))
+                  com.mwojnar.gen.Message.getDefaultInstance()))
               .setSchemaDescriptor(new ChatMethodDescriptorSupplier("Join"))
               .build();
         }
@@ -128,14 +128,14 @@ public final class ChatGrpc {
     /**
      */
     public io.grpc.stub.StreamObserver<com.mwojnar.gen.Message> sendMessage(
-        io.grpc.stub.StreamObserver<com.mwojnar.gen.Message> responseObserver) {
+        io.grpc.stub.StreamObserver<com.mwojnar.gen.Empty> responseObserver) {
       return io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall(getSendMessageMethod(), responseObserver);
     }
 
     /**
      */
     public void join(com.mwojnar.gen.UserInfo request,
-        io.grpc.stub.StreamObserver<com.mwojnar.gen.JoinResponse> responseObserver) {
+        io.grpc.stub.StreamObserver<com.mwojnar.gen.Message> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getJoinMethod(), responseObserver);
     }
 
@@ -143,17 +143,17 @@ public final class ChatGrpc {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
             getSendMessageMethod(),
-            io.grpc.stub.ServerCalls.asyncBidiStreamingCall(
+            io.grpc.stub.ServerCalls.asyncClientStreamingCall(
               new MethodHandlers<
                 com.mwojnar.gen.Message,
-                com.mwojnar.gen.Message>(
+                com.mwojnar.gen.Empty>(
                   this, METHODID_SEND_MESSAGE)))
           .addMethod(
             getJoinMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncServerStreamingCall(
               new MethodHandlers<
                 com.mwojnar.gen.UserInfo,
-                com.mwojnar.gen.JoinResponse>(
+                com.mwojnar.gen.Message>(
                   this, METHODID_JOIN)))
           .build();
     }
@@ -176,16 +176,16 @@ public final class ChatGrpc {
     /**
      */
     public io.grpc.stub.StreamObserver<com.mwojnar.gen.Message> sendMessage(
-        io.grpc.stub.StreamObserver<com.mwojnar.gen.Message> responseObserver) {
-      return io.grpc.stub.ClientCalls.asyncBidiStreamingCall(
+        io.grpc.stub.StreamObserver<com.mwojnar.gen.Empty> responseObserver) {
+      return io.grpc.stub.ClientCalls.asyncClientStreamingCall(
           getChannel().newCall(getSendMessageMethod(), getCallOptions()), responseObserver);
     }
 
     /**
      */
     public void join(com.mwojnar.gen.UserInfo request,
-        io.grpc.stub.StreamObserver<com.mwojnar.gen.JoinResponse> responseObserver) {
-      io.grpc.stub.ClientCalls.asyncUnaryCall(
+        io.grpc.stub.StreamObserver<com.mwojnar.gen.Message> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncServerStreamingCall(
           getChannel().newCall(getJoinMethod(), getCallOptions()), request, responseObserver);
     }
   }
@@ -206,8 +206,9 @@ public final class ChatGrpc {
 
     /**
      */
-    public com.mwojnar.gen.JoinResponse join(com.mwojnar.gen.UserInfo request) {
-      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+    public java.util.Iterator<com.mwojnar.gen.Message> join(
+        com.mwojnar.gen.UserInfo request) {
+      return io.grpc.stub.ClientCalls.blockingServerStreamingCall(
           getChannel(), getJoinMethod(), getCallOptions(), request);
     }
   }
@@ -224,14 +225,6 @@ public final class ChatGrpc {
     protected ChatFutureStub build(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new ChatFutureStub(channel, callOptions);
-    }
-
-    /**
-     */
-    public com.google.common.util.concurrent.ListenableFuture<com.mwojnar.gen.JoinResponse> join(
-        com.mwojnar.gen.UserInfo request) {
-      return io.grpc.stub.ClientCalls.futureUnaryCall(
-          getChannel().newCall(getJoinMethod(), getCallOptions()), request);
     }
   }
 
@@ -257,7 +250,7 @@ public final class ChatGrpc {
       switch (methodId) {
         case METHODID_JOIN:
           serviceImpl.join((com.mwojnar.gen.UserInfo) request,
-              (io.grpc.stub.StreamObserver<com.mwojnar.gen.JoinResponse>) responseObserver);
+              (io.grpc.stub.StreamObserver<com.mwojnar.gen.Message>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -271,7 +264,7 @@ public final class ChatGrpc {
       switch (methodId) {
         case METHODID_SEND_MESSAGE:
           return (io.grpc.stub.StreamObserver<Req>) serviceImpl.sendMessage(
-              (io.grpc.stub.StreamObserver<com.mwojnar.gen.Message>) responseObserver);
+              (io.grpc.stub.StreamObserver<com.mwojnar.gen.Empty>) responseObserver);
         default:
           throw new AssertionError();
       }

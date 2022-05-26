@@ -17,7 +17,7 @@ message Message {
   optional uint64 id = 1;
   optional uint64 replyId = 2;
   optional uint64 ackId = 3;
-  uint64 userId = 4;
+  optional uint64 userId = 4;
   Priority priority = 5;
   string text = 6;
   uint64 time = 7;
@@ -26,16 +26,15 @@ message Message {
 }
 
 message UserInfo {
-  uint64 userId = 1;
-  uint64 groupId = 2;
+  optional uint64 userId = 1;
+  optional uint64 groupId = 2;
   optional uint64 ackId = 3;
 }
 
-message JoinResponse {
-  repeated Message messages = 1;
+message Empty{
 }
 
 service Chat {
-  rpc SendMessage(stream Message) returns (stream Message) {}
-  rpc Join(UserInfo) returns (JoinResponse) {}
+  rpc SendMessage(stream Message) returns (Empty) {}
+  rpc Join(UserInfo) returns (stream Message) {}
 }
