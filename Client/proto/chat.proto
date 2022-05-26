@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.mwojnar.gen";
+option java_outer_classname = "ChatProto";
+
+package chat;
+
+enum Priority {
+  HIGH = 0;
+  MEDIUM = 1;
+  NORMAL = 2;
+  LOW = 3;
+}
+
+message Message {
+  optional uint64 id = 1;
+  optional uint64 replyId = 2;
+  optional uint64 ackId = 3;
+  optional uint64 userId = 4;
+  Priority priority = 5;
+  string text = 6;
+  uint64 time = 7;
+  optional bytes media = 8;
+  optional string mime = 9;
+}
+
+message UserInfo {
+  optional uint64 userId = 1;
+  optional uint64 groupId = 2;
+  optional uint64 ackId = 3;
+}
+
+message Empty{
+}
+
+service Chat {
+  rpc SendMessage(stream Message) returns (Empty) {}
+  rpc Join(UserInfo) returns (stream Message) {}
+}
