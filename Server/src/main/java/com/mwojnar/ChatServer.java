@@ -28,25 +28,25 @@ public class ChatServer {
     private final Connection connection;
 
     public ChatServer(int port, int nThreads) throws SQLException {
-        this.logger = Logger.getLogger(ChatServer.class.getName());
+        logger = Logger.getLogger(ChatServer.class.getName());
 
         try {
-            this.connection = DriverManager.getConnection(CONNECTION_STRING);
-            this.logger.info("Server connected to database.");
+            connection = DriverManager.getConnection(CONNECTION_STRING);
+            logger.info("Server connected to database.");
         } catch (SQLException e) {
-            this.logger.warning("Server couldn't connect to database.");
+            logger.warning("Server couldn't connect to database.");
             throw e;
         }
 
         try {
-            createTables();
+            createTablesIfNotExist();
         } catch (SQLException e) {
-            this.logger.warning("Server couldn't create database tables.");
+            logger.warning("Server couldn't create database tables.");
             throw e;
         }
 
         this.port = port;
-        this.server = ServerBuilder
+        server = ServerBuilder
                 .forPort(port)
                 .executor(Executors.newFixedThreadPool(nThreads))
                 .addService(new ChatImpl(logger, connection))
@@ -61,19 +61,19 @@ public class ChatServer {
         this(DEFAULT_PORT);
     }
 
-    private void createTables() throws SQLException {
-        var statement = this.connection.createStatement();
+    private void createTablesIfNotExist() throws SQLException {
+        var statement = connection.createStatement();
         statement.executeUpdate("""
                     CREATE TABLE IF NOT EXISTS groups (
-                        group_id  INTEGER PRIMARY KEY,
-                        last_id   INTEGER DEFAULT 0 NOT NULL
+                        group_id    INTEGER PRIMARY KEY,
+                        last_id     INTEGER DEFAULT 0 NOT NULL
                     );
                 """);
         statement.executeUpdate("""
                     CREATE TABLE IF NOT EXISTS users (
-                        user_id   INTEGER PRIMARY KEY,
-                        group_id  INTEGER REFERENCES groups (group_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
-                        ack_id    INTEGER
+                        user_id     INTEGER PRIMARY KEY,
+                        group_id    INTEGER REFERENCES groups (group_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
+                        ack_id      INTEGER
                     );
                 """);
         statement.executeUpdate("""
@@ -93,35 +93,35 @@ public class ChatServer {
     }
 
     private void start() throws IOException {
-        this.server.start();
-        this.logger.info("Server started, listening on " + this.port);
+        server.start();
+        logger.info("Server started, listening on " + port);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
-                this.stop();
+                stop();
             } catch (SQLException e) {
-                this.logger.warning("Server couldn't close database connection.");
+                logger.warning("Server couldn't close database connection.");
                 System.out.println(e.getMessage());
             }
         }));
     }
 
     private void stop() throws SQLException {
-        if (this.connection != null) {
-            this.connection.close();
-            this.logger.info("Database connection closed.");
+        if (connection != null) {
+            connection.close();
+            logger.info("Database connection closed.");
         }
 
-        if (this.server != null) {
-            this.logger.info("Shutting down server.");
-            this.server.shutdown();
-            this.logger.info("Server shut down.");
+        if (server != null) {
+            logger.info("Shutting down server.");
+            server.shutdown();
+            logger.info("Server shut down.");
         }
     }
 
     private void blockUntilShutdown() throws InterruptedException {
-        if (this.server != null) {
-            this.server.awaitTermination();
+        if (server != null) {
+            server.awaitTermination();
         }
     }
 }
