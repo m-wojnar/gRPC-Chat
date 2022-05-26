@@ -65,8 +65,7 @@ public class ChatServer {
         var statement = connection.createStatement();
         statement.executeUpdate("""
                     CREATE TABLE IF NOT EXISTS groups (
-                        group_id    INTEGER PRIMARY KEY,
-                        last_id     INTEGER DEFAULT 0 NOT NULL
+                        group_id    INTEGER PRIMARY KEY
                     );
                 """);
         statement.executeUpdate("""
@@ -80,7 +79,6 @@ public class ChatServer {
                     CREATE TABLE IF NOT EXISTS messages (
                         message_id  INTEGER PRIMARY KEY,
                         reply_id    INTEGER,
-                        ack_id      INTEGER,
                         user_id     INTEGER REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
                         group_id    INTEGER REFERENCES groups (group_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
                         priority    INTEGER NOT NULL,
