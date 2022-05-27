@@ -85,24 +85,21 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
         var statement = connection.createStatement();
 
         if (ackId == null) {
-            var resultSet = statement.executeQuery("SELECT MAX(message_id) FROM messages WHERE group_id == " + groupId);
-            ackId = resultSet.getLong("message_id");
-            if (resultSet.wasNull()) {
-                throw new SQLException();
-            }
+            var resultSet = statement.executeQuery("SELECT COALESCE(MAX(message_id), 0) FROM messages WHERE group_id == " + groupId);
+            ackId = resultSet.getLong(1);
         }
 
-        statement.executeUpdate(String.format("INSERT INTO users VALUES(%d, %d, %d) ON DUPLICATE KEY UPDATE", userId, groupId, ackId));
+        statement.executeUpdate(String.format("INSERT OR REPLACE INTO users VALUES(%d, %d, %d)", userId, groupId, ackId));
         return ackId;
     }
 
     private List<Message> getMissingMessages(long groupId, long ackId) throws SQLException, IOException {
         var statement = connection.createStatement();
+        var ackResult = statement.executeQuery("SELECT COALESCE(MAX(message_id), 0) FROM messages WHERE group_id == " + groupId);
+        var serverAckId = ackResult.getLong(1);
+
         var resultsSet = statement.executeQuery(String.format("SELECT * FROM messages WHERE group_id == %d AND message_id > %d", groupId, ackId));
         var list = new LinkedList<Message>();
-
-        var ackResult = statement.executeQuery("SELECT MAX(message_id) FROM messages WHERE group_id == " + groupId);
-        var serverAckId = ackResult.getLong("message_id");
 
         while (resultsSet.next()) {
             var message = Message.newBuilder()
@@ -175,35 +172,36 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
                         .filter(entry -> entry.getKey() != message.getUserId())
                         .forEach(entry -> entry.getValue().onNext(response.build()));
 
-                logger.info(String.format("Received message %d from user %d and send to other users.", newMessageId, message.getUserId()));
+                logger.info(String.format("Received message %d from user %d and sent to other users.", newMessageId, message.getUserId()));
             }
 
             private long saveMessage(Message message) throws SQLException {
                 var statement = connection.createStatement();
                 var groupResult = statement.executeQuery("SELECT group_id FROM users WHERE user_id == " + message.getUserId());
-                groupId = groupResult.getLong("group_id");
+                groupId = groupResult.getLong(1);
 
                 if (groupResult.wasNull()) {
                     throw new SQLException();
                 }
 
-                var idResult = statement.executeQuery("SELECT MAX(message_id) FROM messages WHERE group_id == " + groupId);
-                var newMessageId = idResult.getLong("message_id") + 1;
+                var idResult = statement.executeQuery("SELECT COALESCE(MAX(message_id), 0) FROM messages WHERE group_id == " + groupId);
+                var newMessageId = idResult.getLong(1) + 1;
 
                 statement.executeUpdate(String.format("UPDATE users SET ack_id = %d WHERE user_id == %d", message.getAckId(), userId));
                 removeOldMessages(groupId);
 
-                var preparedStatement = connection.prepareStatement(
-                        String.format("INSERT INTO messages VALUES (%d, %s, %d, %d, %d, %s, %d, ?, %s)",
-                                newMessageId,
-                                message.hasReplyId() ? message.getReplyId() : "NULL",
-                                userId,
-                                groupId,
-                                message.getPriorityValue(),
-                                message.getText(),
-                                message.getTime(),
-                                message.hasMime() ? message.getMime() : "NULL"
-                        ));
+                var sql = String.format("INSERT INTO messages VALUES (%d, %s, %d, %d, %d, \"%s\", %d, %s, %s)",
+                        newMessageId,
+                        message.hasReplyId() ? message.getReplyId() : "NULL",
+                        userId,
+                        groupId,
+                        message.getPriorityValue(),
+                        message.getText(),
+                        message.getTime(),
+                        message.hasMedia() ? "?" : "NULL",
+                        message.hasMime() ? message.getMime() : "NULL"
+                );
+                var preparedStatement = connection.prepareStatement(sql);
 
                 if (message.hasMedia()) {
                     preparedStatement.setBlob(1, message.getMedia().newInput());
@@ -216,7 +214,7 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
             private void removeOldMessages(long groupId) throws SQLException {
                 var statement = connection.createStatement();
                 var resultSet = statement.executeQuery("SELECT MIN(ack_id) FROM users WHERE group_id == " + groupId);
-                var ackId = resultSet.getLong("ack_id");
+                var ackId = resultSet.getLong(1);
                 statement.executeUpdate(String.format("DELETE FROM messages WHERE group_id == %d AND message_id <= %d", groupId, ackId));
             }
 
