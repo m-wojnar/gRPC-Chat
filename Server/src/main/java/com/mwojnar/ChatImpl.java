@@ -150,7 +150,7 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
                     return;
                 }
 
-                var response = Message.newBuilder()
+                var responseBuilder = Message.newBuilder()
                         .setId(newMessageId)
                         .setAckId(newMessageId)
                         .setUserId(userId)
@@ -159,18 +159,26 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
                         .setTime(message.getTime());
 
                 if (message.hasReplyId()) {
-                    response.setReplyId(message.getReplyId());
+                    responseBuilder.setReplyId(message.getReplyId());
                 }
 
                 if (message.hasMedia()) {
-                    response.setMedia(message.getMedia());
-                    response.setMime(message.getMime());
+                    responseBuilder.setMedia(message.getMedia());
+                    responseBuilder.setMime(message.getMime());
                 }
 
-                observers.entrySet()
-                        .stream()
-                        .filter(entry -> entry.getKey() != message.getUserId())
-                        .forEach(entry -> entry.getValue().onNext(response.build()));
+                var response = responseBuilder.build();
+
+                for (var entry : observers.entrySet()) {
+                    if (entry.getKey() != message.getUserId()) {
+                        try {
+                            entry.getValue().onNext(response);
+                        } catch (StatusRuntimeException e) {
+                            logger.warning("Couldn't deliver message to user " + entry.getKey() + " => removing user.");
+                            observers.remove(entry.getKey());
+                        }
+                    }
+                }
 
                 logger.info(String.format("Received message %d from user %d and sent to other users.", newMessageId, message.getUserId()));
             }
