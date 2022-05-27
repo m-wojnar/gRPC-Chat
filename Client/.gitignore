@@ -1,1 +1,9 @@
+# IntelliJ Idea files
 .idea/
+
+# build files
+target/
+.gradle
+gradle/
+**/build/
+!src/**/build/
