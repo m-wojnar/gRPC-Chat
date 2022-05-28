@@ -76,7 +76,7 @@ object ChatGrpcKt {
     suspend fun sendMessage(requests: Flow<Message>, headers: Metadata = Metadata()): Empty =
         clientStreamingRpc(
       channel,
-          ChatGrpc.getSendMessageMethod(),
+      ChatGrpc.getSendMessageMethod(),
       requests,
       callOptions,
       headers

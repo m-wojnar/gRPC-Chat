@@ -4,23 +4,23 @@
 package com.mwojnar.gen;
 
 @kotlin.jvm.JvmSynthetic
-public inline fun userInfo(block: UserInfoKt.Dsl.() -> kotlin.Unit): UserInfo =
-  UserInfoKt.Dsl._create(UserInfo.newBuilder()).apply { block() }._build()
+public inline fun userInfo(block: com.mwojnar.gen.UserInfoKt.Dsl.() -> kotlin.Unit): com.mwojnar.gen.UserInfo =
+  com.mwojnar.gen.UserInfoKt.Dsl._create(com.mwojnar.gen.UserInfo.newBuilder()).apply { block() }._build()
 public object UserInfoKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
   public class Dsl private constructor(
-    private val _builder: UserInfo.Builder
+    private val _builder: com.mwojnar.gen.UserInfo.Builder
   ) {
     public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
-      internal fun _create(builder: UserInfo.Builder): Dsl = Dsl(builder)
+      internal fun _create(builder: com.mwojnar.gen.UserInfo.Builder): Dsl = Dsl(builder)
     }
 
     @kotlin.jvm.JvmSynthetic
     @kotlin.PublishedApi
-    internal fun _build(): UserInfo = _builder.build()
+    internal fun _build(): com.mwojnar.gen.UserInfo = _builder.build()
 
     /**
      * <code>optional uint64 userId = 1;</code>
@@ -96,5 +96,5 @@ public object UserInfoKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun UserInfo.copy(block: UserInfoKt.Dsl.() -> kotlin.Unit): UserInfo =
-  UserInfoKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+public inline fun com.mwojnar.gen.UserInfo.copy(block: com.mwojnar.gen.UserInfoKt.Dsl.() -> kotlin.Unit): com.mwojnar.gen.UserInfo =
+  com.mwojnar.gen.UserInfoKt.Dsl._create(this.toBuilder()).apply { block() }._build()

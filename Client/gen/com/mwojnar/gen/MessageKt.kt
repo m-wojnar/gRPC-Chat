@@ -4,23 +4,23 @@
 package com.mwojnar.gen;
 
 @kotlin.jvm.JvmSynthetic
-public inline fun message(block: MessageKt.Dsl.() -> kotlin.Unit): Message =
-  MessageKt.Dsl._create(Message.newBuilder()).apply { block() }._build()
+public inline fun message(block: com.mwojnar.gen.MessageKt.Dsl.() -> kotlin.Unit): com.mwojnar.gen.Message =
+  com.mwojnar.gen.MessageKt.Dsl._create(com.mwojnar.gen.Message.newBuilder()).apply { block() }._build()
 public object MessageKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
   public class Dsl private constructor(
-    private val _builder: Message.Builder
+    private val _builder: com.mwojnar.gen.Message.Builder
   ) {
     public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
-      internal fun _create(builder: Message.Builder): Dsl = Dsl(builder)
+      internal fun _create(builder: com.mwojnar.gen.Message.Builder): Dsl = Dsl(builder)
     }
 
     @kotlin.jvm.JvmSynthetic
     @kotlin.PublishedApi
-    internal fun _build(): Message = _builder.build()
+    internal fun _build(): com.mwojnar.gen.Message = _builder.build()
 
     /**
      * <code>optional uint64 id = 1;</code>
@@ -121,7 +121,7 @@ public object MessageKt {
     /**
      * <code>.chat.Priority priority = 5;</code>
      */
-    public var priority: Priority
+    public var priority: com.mwojnar.gen.Priority
       @JvmName("getPriority")
       get() = _builder.getPriority()
       @JvmName("setPriority")
@@ -153,7 +153,7 @@ public object MessageKt {
     }
 
     /**
-     * <code>uint64 time = 7;</code>
+     * <code>optional uint64 time = 7;</code>
      */
     public var time: kotlin.Long
       @JvmName("getTime")
@@ -163,10 +163,17 @@ public object MessageKt {
         _builder.setTime(value)
       }
     /**
-     * <code>uint64 time = 7;</code>
+     * <code>optional uint64 time = 7;</code>
      */
     public fun clearTime() {
       _builder.clearTime()
+    }
+    /**
+     * <code>optional uint64 time = 7;</code>
+     * @return Whether the time field is set.
+     */
+    public fun hasTime(): kotlin.Boolean {
+      return _builder.hasTime()
     }
 
     /**
@@ -219,5 +226,5 @@ public object MessageKt {
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun Message.copy(block: MessageKt.Dsl.() -> kotlin.Unit): Message =
-  MessageKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+public inline fun com.mwojnar.gen.Message.copy(block: com.mwojnar.gen.MessageKt.Dsl.() -> kotlin.Unit): com.mwojnar.gen.Message =
+  com.mwojnar.gen.MessageKt.Dsl._create(this.toBuilder()).apply { block() }._build()

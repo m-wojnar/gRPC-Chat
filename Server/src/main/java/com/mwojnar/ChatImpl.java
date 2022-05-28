@@ -60,11 +60,22 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
             missingMessages = new LinkedList<>();
         }
 
+        long lastTime;
+        try {
+            lastTime = getLastTime(request.getUserId());
+        } catch (SQLException e) {
+            logger.warning("Couldn't find last messages for user " + request.getUserId() + ".");
+            lastTime = System.currentTimeMillis() / 1000;
+        }
+
         if (!missingMessages.isEmpty()) {
             missingMessages.forEach(responseObserver::onNext);
             logger.info(String.format("%d missing messages send to user %d.", missingMessages.size(), request.getUserId()));
         } else {
-            var response = Message.newBuilder().setAckId(ackId).build();
+            var response = Message.newBuilder()
+                    .setTime(lastTime)
+                    .setAckId(ackId)
+                    .build();
             responseObserver.onNext(response);
         }
 
@@ -126,6 +137,12 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
         }
 
         return list;
+    }
+
+    private long getLastTime(long userId) throws SQLException {
+        var statement = connection.createStatement();
+        var resultSet = statement.executeQuery("SELECT MAX(time) FROM messages WHERE user_id == " + userId);
+        return resultSet.getLong(1);
     }
 
     @Override

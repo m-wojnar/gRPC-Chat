@@ -4,25 +4,25 @@
 package com.mwojnar.gen;
 
 @kotlin.jvm.JvmSynthetic
-public inline fun empty(block: EmptyKt.Dsl.() -> kotlin.Unit): Empty =
-  EmptyKt.Dsl._create(Empty.newBuilder()).apply { block() }._build()
+public inline fun empty(block: com.mwojnar.gen.EmptyKt.Dsl.() -> kotlin.Unit): com.mwojnar.gen.Empty =
+  com.mwojnar.gen.EmptyKt.Dsl._create(com.mwojnar.gen.Empty.newBuilder()).apply { block() }._build()
 public object EmptyKt {
   @kotlin.OptIn(com.google.protobuf.kotlin.OnlyForUseByGeneratedProtoCode::class)
   @com.google.protobuf.kotlin.ProtoDslMarker
   public class Dsl private constructor(
-    private val _builder: Empty.Builder
+    private val _builder: com.mwojnar.gen.Empty.Builder
   ) {
     public companion object {
       @kotlin.jvm.JvmSynthetic
       @kotlin.PublishedApi
-      internal fun _create(builder: Empty.Builder): Dsl = Dsl(builder)
+      internal fun _create(builder: com.mwojnar.gen.Empty.Builder): Dsl = Dsl(builder)
     }
 
     @kotlin.jvm.JvmSynthetic
     @kotlin.PublishedApi
-    internal fun _build(): Empty = _builder.build()
+    internal fun _build(): com.mwojnar.gen.Empty = _builder.build()
   }
 }
 @kotlin.jvm.JvmSynthetic
-public inline fun Empty.copy(block: EmptyKt.Dsl.() -> kotlin.Unit): Empty =
-  EmptyKt.Dsl._create(this.toBuilder()).apply { block() }._build()
+public inline fun com.mwojnar.gen.Empty.copy(block: com.mwojnar.gen.EmptyKt.Dsl.() -> kotlin.Unit): com.mwojnar.gen.Empty =
+  com.mwojnar.gen.EmptyKt.Dsl._create(this.toBuilder()).apply { block() }._build()

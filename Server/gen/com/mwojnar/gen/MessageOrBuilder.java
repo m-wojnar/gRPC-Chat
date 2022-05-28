@@ -75,7 +75,12 @@ public interface MessageOrBuilder extends
       getTextBytes();
 
   /**
-   * <code>uint64 time = 7;</code>
+   * <code>optional uint64 time = 7;</code>
+   * @return Whether the time field is set.
+   */
+  boolean hasTime();
+  /**
+   * <code>optional uint64 time = 7;</code>
    * @return The time.
    */
   long getTime();

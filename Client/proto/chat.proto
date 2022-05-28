@@ -20,7 +20,7 @@ message Message {
   optional uint64 userId = 4;
   Priority priority = 5;
   string text = 6;
-  uint64 time = 7;
+  optional uint64 time = 7;
   optional bytes media = 8;
   optional string mime = 9;
 }
