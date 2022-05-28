@@ -262,8 +262,10 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
                     return;
                 }
 
+                observers.get(userId).onCompleted();
+                observers.remove(userId);
+
                 try {
-                    observers.remove(userId);
                     removeUser(userId);
                 } catch (SQLException e) {
                     logger.warning("Couldn't remove user " + userId + ".");
