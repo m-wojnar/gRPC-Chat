@@ -9,6 +9,7 @@ import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -215,21 +216,28 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
                 statement.executeUpdate(String.format("UPDATE users SET ack_id = %d WHERE user_id == %d", message.getAckId(), userId));
                 removeOldMessages(groupId);
 
-                var sql = String.format("INSERT INTO messages VALUES (%d, %s, %d, %d, %d, \"%s\", %d, %s, %s)",
-                        newMessageId,
-                        message.hasReplyId() ? message.getReplyId() : "NULL",
-                        userId,
-                        groupId,
-                        message.getPriorityValue(),
-                        message.getText(),
-                        message.getTime(),
-                        message.hasMedia() ? "?" : "NULL",
-                        message.hasMime() ? message.getMime() : "NULL"
-                );
-                var preparedStatement = connection.prepareStatement(sql);
+                var preparedStatement = connection.prepareStatement("INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                preparedStatement.setLong(1, newMessageId);
+                preparedStatement.setLong(3, userId);
+                preparedStatement.setLong(4, groupId);
+                preparedStatement.setInt(5, message.getPriorityValue());
+                preparedStatement.setString(6, message.getText());
+                preparedStatement.setLong(7, message.getTime());
 
-                if (message.hasMedia()) {
-                    preparedStatement.setBlob(1, message.getMedia().newInput());
+                if (message.hasReplyId()) {
+                    preparedStatement.setLong(2, message.getReplyId());
+                }
+                else {
+                    preparedStatement.setNull(2, Types.NULL);
+                }
+
+                if (message.hasMedia() && message.hasMime()) {
+                    preparedStatement.setBytes(8, message.getMedia().toByteArray());
+                    preparedStatement.setString(9, message.getMime());
+                }
+                else {
+                    preparedStatement.setNull(8, Types.NULL);
+                    preparedStatement.setNull(9, Types.NULL);
                 }
 
                 preparedStatement.executeUpdate();
