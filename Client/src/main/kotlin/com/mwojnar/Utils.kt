@@ -1,11 +1,12 @@
 package com.mwojnar
 
-import com.google.protobuf.kotlin.toByteStringUtf8
+import com.google.protobuf.kotlin.toByteString
 import com.mwojnar.gen.Message
 import com.mwojnar.gen.Priority
 import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 fun ClientMessage.toMessage(clientState: ClientState): Message {
     val messageBuilder = Message.newBuilder()
@@ -20,7 +21,7 @@ fun ClientMessage.toMessage(clientState: ClientState): Message {
     }
 
     if (media != null && mime != null) {
-        messageBuilder.media = media.toByteStringUtf8()
+        messageBuilder.media = Base64.getDecoder().decode(media).toByteString()
         messageBuilder.mime = mime
     }
 
@@ -42,15 +43,23 @@ fun Message.print() {
         else -> ""
     }
 
-    val dateTime = LocalDateTime.ofEpochSecond(time, 0, ZoneOffset.UTC)
+    val dateTime = LocalDateTime.ofEpochSecond(time, 0, OffsetDateTime.now().offset)
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
 
-    messageString += "[${priority}user ${userId} | ${dateTime.format(formatter)}] "
+    messageString += "${id}: [${priority}user $userId | ${dateTime.format(formatter)}] "
     messageString += text
 
     if (hasMedia() && hasMime()) {
-        messageString += "\n${mime}: ${media}"
+        messageString += "\n${mime}: ${String(Base64.getEncoder().encode(media.toByteArray()))}"
     }
 
     println(messageString)
 }
+
+fun charToPriority(char: Char): Priority =
+    when (char.uppercase()) {
+        "H" -> Priority.HIGH
+        "M" -> Priority.MEDIUM
+        "L" -> Priority.LOW
+        else -> Priority.NORMAL
+    }

@@ -15,6 +15,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.serializer
@@ -25,6 +26,8 @@ import java.util.*
 class Client(userId: Long, groupId: Long) : Closeable {
     private val state: ClientState
     private val fileName: String
+    private val startSemaphore: Semaphore
+    private val missingMessagesSemaphore: Semaphore
 
     init {
         fileName = "saved/client_${userId}_group_${groupId}"
@@ -32,11 +35,17 @@ class Client(userId: Long, groupId: Long) : Closeable {
             val bytes = File(fileName).readBytes()
             ProtoBuf.decodeFromByteArray(bytes)
         } else {
-            ClientState(userId, groupId, -1, LinkedList<ClientMessage>())
+            ClientState(userId, groupId, -1, LinkedList())
         }
+
+        startSemaphore = Semaphore(1)
+        missingMessagesSemaphore = Semaphore(1)
     }
 
     suspend fun start(stub: ChatGrpcKt.ChatCoroutineStub) {
+        startSemaphore.acquire()
+        missingMessagesSemaphore.acquire()
+
         CoroutineScope(Dispatchers.Default).async { receiveMessages(stub) }
 
         var reconnect: Boolean
@@ -45,13 +54,15 @@ class Client(userId: Long, groupId: Long) : Closeable {
                 stub.sendMessage(sendMessages())
                 false
             } catch (e: io.grpc.StatusException) {
-                println("Cannot send message to server => message saved.")
                 true
             }
         } while (reconnect)
     }
 
     override fun close() {
+        // TODO client never reaches this method
+        println("Client closed. Saving client state.")
+
         synchronized(this) {
             val bytes = ProtoBuf.encodeToByteArray(serializer(), state)
             File(fileName).writeBytes(bytes)
@@ -70,7 +81,7 @@ class Client(userId: Long, groupId: Long) : Closeable {
             }
 
             reconnect = try {
-                stub.join(userInfoBuilder.build()).collect { messageHandler(it) }
+                stub.join(userInfoBuilder.build()).collect { messagesHandler(it) }
                 false
             } catch (e: io.grpc.StatusException) {
                 println("Cannot connect to server. Reconnecting in 5 s...")
@@ -80,41 +91,79 @@ class Client(userId: Long, groupId: Long) : Closeable {
         } while (reconnect)
     }
 
-    private fun messageHandler(message: Message) {
-        if (!message.hasId()) {
-            if (state.ackId == -1L) {
-                state.ackId = message.ackId
-            } else {
-                // TODO send missing messages
-            }
-            println("Client connected to server.")
-        } else if (message.hasAckId() && state.ackId < message.ackId) {
-            state.ackId = message.ackId
-            message.print()
-        }
-
+    private fun messagesHandler(message: Message) {
         if (message.hasTime()) {
             state.messages.removeIf { it.time <= message.time }
         } else {
             println("Cannot remove old messages.")
         }
+
+        if (!message.hasId()) {
+            if (state.ackId == -1L) {
+                state.ackId = message.ackId
+            } else {
+                missingMessagesSemaphore.release()
+            }
+
+            try {
+                startSemaphore.release()
+            } catch (_: java.lang.IllegalStateException) {
+            }
+
+            println("Client connected to server.")
+        } else if (message.hasAckId() && state.ackId < message.ackId) {
+            state.ackId = message.ackId
+            message.print()
+        }
     }
 
     private fun sendMessages(): Flow<Message> = flow {
+        startSemaphore.acquire()
+
         while (true) {
-            // TODO cli loop
+            if (missingMessagesSemaphore.tryAcquire()) {
+                println("Send missing messages.")
+                state.messages.forEach { emit(it.toMessage(state)) }
+            }
 
-            val text = readln()
-            val clientMessage = ClientMessage(
-                null,
-                Priority.NORMAL,
-                text,
-                System.currentTimeMillis() / 1000,
-                null,
-                null
-            )
+            val input = readln()
+            if (input.isEmpty()) {
+                continue
+            }
+
+            var settings: String
+            var text: String
+            var priority = Priority.NORMAL
+            var replyId: Long? = null
+            var media: String? = null
+            var mime: String? = null
+
+            val inputArray = input.split('|')
+            if (inputArray.size > 1) {
+                settings = inputArray[0]
+                text = inputArray[1]
+            } else {
+                settings = ""
+                text = input
+            }
+
+            settings.split("#").forEach {
+                if (it.isNotEmpty()) {
+                    when (it[0].uppercase()) {
+                        "P" -> priority = charToPriority(it[1])
+                        "R" -> replyId = it.substring(1).toLong()
+                        "M" -> {
+                            val mediaArray = it.substring(1).split('&')
+                            mime = mediaArray[0]
+                            media = mediaArray[1]
+                        }
+                        "X" -> return@flow
+                    }
+                }
+            }
+
+            val clientMessage = ClientMessage(replyId, priority, text, System.currentTimeMillis() / 1000, media, mime)
             state.messages.push(clientMessage)
-
             emit(clientMessage.toMessage(state))
         }
     }
