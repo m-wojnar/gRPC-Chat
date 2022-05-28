@@ -21,7 +21,6 @@ import kotlinx.serialization.serializer
 import java.io.Closeable
 import java.io.File
 import java.util.*
-import kotlin.math.max
 
 class Client(userId: Long, groupId: Long) : Closeable {
     private val state: ClientState
@@ -46,8 +45,7 @@ class Client(userId: Long, groupId: Long) : Closeable {
                 stub.sendMessage(sendMessages())
                 false
             } catch (e: io.grpc.StatusException) {
-                println("Cannot connect to server. Reconnecting in 5 s...")
-                delay(5000)
+                println("Cannot send message to server => message saved.")
                 true
             }
         } while (reconnect)
@@ -61,18 +59,18 @@ class Client(userId: Long, groupId: Long) : Closeable {
     }
 
     private suspend fun receiveMessages(stub: ChatGrpcKt.ChatCoroutineStub) {
-        val userInfoBuilder = UserInfo.newBuilder()
-            .setUserId(state.userId)
-            .setGroupId(state.groupId)
-
-        if (state.ackId >= 0) {
-            userInfoBuilder.ackId = state.ackId
-        }
-
         var reconnect: Boolean
         do {
+            val userInfoBuilder = UserInfo.newBuilder()
+                .setUserId(state.userId)
+                .setGroupId(state.groupId)
+
+            if (state.ackId >= 0) {
+                userInfoBuilder.ackId = state.ackId
+            }
+
             reconnect = try {
-                stub.join(userInfoBuilder.build()).collect { messageHandler(it)}
+                stub.join(userInfoBuilder.build()).collect { messageHandler(it) }
                 false
             } catch (e: io.grpc.StatusException) {
                 println("Cannot connect to server. Reconnecting in 5 s...")
@@ -83,18 +81,22 @@ class Client(userId: Long, groupId: Long) : Closeable {
     }
 
     private fun messageHandler(message: Message) {
-        if (!message.hasId() && message.hasAckId()) {
+        if (!message.hasId()) {
             if (state.ackId == -1L) {
                 state.ackId = message.ackId
-            }
-            else {
+            } else {
                 // TODO send missing messages
             }
-        }
-        else if (message.hasId() && message.hasAckId()) {
-            state.ackId = max(state.ackId, message.ackId)
+            println("Client connected to server.")
+        } else if (message.hasAckId() && state.ackId < message.ackId) {
+            state.ackId = message.ackId
             message.print()
-            // TODO remove old messages
+        }
+
+        if (message.hasTime()) {
+            state.messages.removeIf { it.time <= message.time }
+        } else {
+            println("Cannot remove old messages.")
         }
     }
 
@@ -103,27 +105,17 @@ class Client(userId: Long, groupId: Long) : Closeable {
             // TODO cli loop
 
             val text = readln()
-            val time = System.currentTimeMillis() / 1000
-
-            val request = Message.newBuilder()
-                .setUserId(state.userId)
-                .setAckId(state.ackId)
-                .setPriority(Priority.NORMAL)
-                .setText(text)
-                .setTime(time)
-                .build()
-
             val clientMessage = ClientMessage(
                 null,
                 Priority.NORMAL,
                 text,
-                time,
+                System.currentTimeMillis() / 1000,
                 null,
                 null
             )
             state.messages.push(clientMessage)
 
-            emit(request)
+            emit(clientMessage.toMessage(state))
         }
     }
 }

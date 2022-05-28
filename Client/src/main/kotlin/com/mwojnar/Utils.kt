@@ -7,10 +7,10 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
-fun ClientMessage.toMessage(userId: Long, ackId: Long): Message {
+fun ClientMessage.toMessage(clientState: ClientState): Message {
     val messageBuilder = Message.newBuilder()
-        .setAckId(ackId)
-        .setUserId(userId)
+        .setAckId(clientState.ackId)
+        .setUserId(clientState.userId)
         .setPriority(priority)
         .setText(text)
         .setTime(time)
