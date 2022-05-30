@@ -8,23 +8,13 @@ public interface UserInfoOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>optional uint64 userId = 1;</code>
-   * @return Whether the userId field is set.
-   */
-  boolean hasUserId();
-  /**
-   * <code>optional uint64 userId = 1;</code>
+   * <code>uint64 userId = 1;</code>
    * @return The userId.
    */
   long getUserId();
 
   /**
-   * <code>optional uint64 groupId = 2;</code>
-   * @return Whether the groupId field is set.
-   */
-  boolean hasGroupId();
-  /**
-   * <code>optional uint64 groupId = 2;</code>
+   * <code>uint64 groupId = 2;</code>
    * @return The groupId.
    */
   long getGroupId();

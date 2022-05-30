@@ -4,25 +4,25 @@
 package com.mwojnar.gen;
 
 /**
- * Protobuf type {@code chat.UserInfo}
+ * Protobuf type {@code chat.ServerInfo}
  */
-public final class UserInfo extends
+public final class ServerInfo extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:chat.UserInfo)
-    UserInfoOrBuilder {
+    // @@protoc_insertion_point(message_implements:chat.ServerInfo)
+    ServerInfoOrBuilder {
 private static final long serialVersionUID = 0L;
-  // Use UserInfo.newBuilder() to construct.
-  private UserInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+  // Use ServerInfo.newBuilder() to construct.
+  private ServerInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
   }
-  private UserInfo() {
+  private ServerInfo() {
   }
 
   @java.lang.Override
   @SuppressWarnings({"unused"})
   protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
-    return new UserInfo();
+    return new ServerInfo();
   }
 
   @java.lang.Override
@@ -30,7 +30,7 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private UserInfo(
+  private ServerInfo(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
@@ -38,7 +38,6 @@ private static final long serialVersionUID = 0L;
     if (extensionRegistry == null) {
       throw new java.lang.NullPointerException();
     }
-    int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -51,17 +50,12 @@ private static final long serialVersionUID = 0L;
             break;
           case 8: {
 
-            userId_ = input.readUInt64();
+            time_ = input.readUInt64();
             break;
           }
           case 16: {
 
-            groupId_ = input.readUInt64();
-            break;
-          }
-          case 24: {
-            bitField0_ |= 0x00000001;
-            ackId_ = input.readUInt64();
+            clientAckId_ = input.readUInt64();
             break;
           }
           default: {
@@ -85,57 +79,37 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return com.mwojnar.gen.ChatProto.internal_static_chat_UserInfo_descriptor;
+    return com.mwojnar.gen.ChatProto.internal_static_chat_ServerInfo_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return com.mwojnar.gen.ChatProto.internal_static_chat_UserInfo_fieldAccessorTable
+    return com.mwojnar.gen.ChatProto.internal_static_chat_ServerInfo_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            com.mwojnar.gen.UserInfo.class, com.mwojnar.gen.UserInfo.Builder.class);
+            com.mwojnar.gen.ServerInfo.class, com.mwojnar.gen.ServerInfo.Builder.class);
   }
 
-  private int bitField0_;
-  public static final int USERID_FIELD_NUMBER = 1;
-  private long userId_;
+  public static final int TIME_FIELD_NUMBER = 1;
+  private long time_;
   /**
-   * <code>uint64 userId = 1;</code>
-   * @return The userId.
+   * <code>uint64 time = 1;</code>
+   * @return The time.
    */
   @java.lang.Override
-  public long getUserId() {
-    return userId_;
+  public long getTime() {
+    return time_;
   }
 
-  public static final int GROUPID_FIELD_NUMBER = 2;
-  private long groupId_;
+  public static final int CLIENTACKID_FIELD_NUMBER = 2;
+  private long clientAckId_;
   /**
-   * <code>uint64 groupId = 2;</code>
-   * @return The groupId.
+   * <code>uint64 clientAckId = 2;</code>
+   * @return The clientAckId.
    */
   @java.lang.Override
-  public long getGroupId() {
-    return groupId_;
-  }
-
-  public static final int ACKID_FIELD_NUMBER = 3;
-  private long ackId_;
-  /**
-   * <code>optional uint64 ackId = 3;</code>
-   * @return Whether the ackId field is set.
-   */
-  @java.lang.Override
-  public boolean hasAckId() {
-    return ((bitField0_ & 0x00000001) != 0);
-  }
-  /**
-   * <code>optional uint64 ackId = 3;</code>
-   * @return The ackId.
-   */
-  @java.lang.Override
-  public long getAckId() {
-    return ackId_;
+  public long getClientAckId() {
+    return clientAckId_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -152,14 +126,11 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (userId_ != 0L) {
-      output.writeUInt64(1, userId_);
+    if (time_ != 0L) {
+      output.writeUInt64(1, time_);
     }
-    if (groupId_ != 0L) {
-      output.writeUInt64(2, groupId_);
-    }
-    if (((bitField0_ & 0x00000001) != 0)) {
-      output.writeUInt64(3, ackId_);
+    if (clientAckId_ != 0L) {
+      output.writeUInt64(2, clientAckId_);
     }
     unknownFields.writeTo(output);
   }
@@ -170,17 +141,13 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (userId_ != 0L) {
+    if (time_ != 0L) {
       size += com.google.protobuf.CodedOutputStream
-        .computeUInt64Size(1, userId_);
+        .computeUInt64Size(1, time_);
     }
-    if (groupId_ != 0L) {
+    if (clientAckId_ != 0L) {
       size += com.google.protobuf.CodedOutputStream
-        .computeUInt64Size(2, groupId_);
-    }
-    if (((bitField0_ & 0x00000001) != 0)) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeUInt64Size(3, ackId_);
+        .computeUInt64Size(2, clientAckId_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -192,20 +159,15 @@ private static final long serialVersionUID = 0L;
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof com.mwojnar.gen.UserInfo)) {
+    if (!(obj instanceof com.mwojnar.gen.ServerInfo)) {
       return super.equals(obj);
     }
-    com.mwojnar.gen.UserInfo other = (com.mwojnar.gen.UserInfo) obj;
+    com.mwojnar.gen.ServerInfo other = (com.mwojnar.gen.ServerInfo) obj;
 
-    if (getUserId()
-        != other.getUserId()) return false;
-    if (getGroupId()
-        != other.getGroupId()) return false;
-    if (hasAckId() != other.hasAckId()) return false;
-    if (hasAckId()) {
-      if (getAckId()
-          != other.getAckId()) return false;
-    }
+    if (getTime()
+        != other.getTime()) return false;
+    if (getClientAckId()
+        != other.getClientAckId()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -217,85 +179,80 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + USERID_FIELD_NUMBER;
+    hash = (37 * hash) + TIME_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        getUserId());
-    hash = (37 * hash) + GROUPID_FIELD_NUMBER;
+        getTime());
+    hash = (37 * hash) + CLIENTACKID_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        getGroupId());
-    if (hasAckId()) {
-      hash = (37 * hash) + ACKID_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getAckId());
-    }
+        getClientAckId());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
   }
 
-  public static com.mwojnar.gen.UserInfo parseFrom(
+  public static com.mwojnar.gen.ServerInfo parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.mwojnar.gen.UserInfo parseFrom(
+  public static com.mwojnar.gen.ServerInfo parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.mwojnar.gen.UserInfo parseFrom(
+  public static com.mwojnar.gen.ServerInfo parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.mwojnar.gen.UserInfo parseFrom(
+  public static com.mwojnar.gen.ServerInfo parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.mwojnar.gen.UserInfo parseFrom(byte[] data)
+  public static com.mwojnar.gen.ServerInfo parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.mwojnar.gen.UserInfo parseFrom(
+  public static com.mwojnar.gen.ServerInfo parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.mwojnar.gen.UserInfo parseFrom(java.io.InputStream input)
+  public static com.mwojnar.gen.ServerInfo parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static com.mwojnar.gen.UserInfo parseFrom(
+  public static com.mwojnar.gen.ServerInfo parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static com.mwojnar.gen.UserInfo parseDelimitedFrom(java.io.InputStream input)
+  public static com.mwojnar.gen.ServerInfo parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static com.mwojnar.gen.UserInfo parseDelimitedFrom(
+  public static com.mwojnar.gen.ServerInfo parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static com.mwojnar.gen.UserInfo parseFrom(
+  public static com.mwojnar.gen.ServerInfo parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static com.mwojnar.gen.UserInfo parseFrom(
+  public static com.mwojnar.gen.ServerInfo parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -308,7 +265,7 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(com.mwojnar.gen.UserInfo prototype) {
+  public static Builder newBuilder(com.mwojnar.gen.ServerInfo prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
   @java.lang.Override
@@ -324,26 +281,26 @@ private static final long serialVersionUID = 0L;
     return builder;
   }
   /**
-   * Protobuf type {@code chat.UserInfo}
+   * Protobuf type {@code chat.ServerInfo}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:chat.UserInfo)
-      com.mwojnar.gen.UserInfoOrBuilder {
+      // @@protoc_insertion_point(builder_implements:chat.ServerInfo)
+      com.mwojnar.gen.ServerInfoOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.mwojnar.gen.ChatProto.internal_static_chat_UserInfo_descriptor;
+      return com.mwojnar.gen.ChatProto.internal_static_chat_ServerInfo_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.mwojnar.gen.ChatProto.internal_static_chat_UserInfo_fieldAccessorTable
+      return com.mwojnar.gen.ChatProto.internal_static_chat_ServerInfo_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.mwojnar.gen.UserInfo.class, com.mwojnar.gen.UserInfo.Builder.class);
+              com.mwojnar.gen.ServerInfo.class, com.mwojnar.gen.ServerInfo.Builder.class);
     }
 
-    // Construct using com.mwojnar.gen.UserInfo.newBuilder()
+    // Construct using com.mwojnar.gen.ServerInfo.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }
@@ -361,29 +318,27 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      userId_ = 0L;
+      time_ = 0L;
 
-      groupId_ = 0L;
+      clientAckId_ = 0L;
 
-      ackId_ = 0L;
-      bitField0_ = (bitField0_ & ~0x00000001);
       return this;
     }
 
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return com.mwojnar.gen.ChatProto.internal_static_chat_UserInfo_descriptor;
+      return com.mwojnar.gen.ChatProto.internal_static_chat_ServerInfo_descriptor;
     }
 
     @java.lang.Override
-    public com.mwojnar.gen.UserInfo getDefaultInstanceForType() {
-      return com.mwojnar.gen.UserInfo.getDefaultInstance();
+    public com.mwojnar.gen.ServerInfo getDefaultInstanceForType() {
+      return com.mwojnar.gen.ServerInfo.getDefaultInstance();
     }
 
     @java.lang.Override
-    public com.mwojnar.gen.UserInfo build() {
-      com.mwojnar.gen.UserInfo result = buildPartial();
+    public com.mwojnar.gen.ServerInfo build() {
+      com.mwojnar.gen.ServerInfo result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
@@ -391,17 +346,10 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public com.mwojnar.gen.UserInfo buildPartial() {
-      com.mwojnar.gen.UserInfo result = new com.mwojnar.gen.UserInfo(this);
-      int from_bitField0_ = bitField0_;
-      int to_bitField0_ = 0;
-      result.userId_ = userId_;
-      result.groupId_ = groupId_;
-      if (((from_bitField0_ & 0x00000001) != 0)) {
-        result.ackId_ = ackId_;
-        to_bitField0_ |= 0x00000001;
-      }
-      result.bitField0_ = to_bitField0_;
+    public com.mwojnar.gen.ServerInfo buildPartial() {
+      com.mwojnar.gen.ServerInfo result = new com.mwojnar.gen.ServerInfo(this);
+      result.time_ = time_;
+      result.clientAckId_ = clientAckId_;
       onBuilt();
       return result;
     }
@@ -440,24 +388,21 @@ private static final long serialVersionUID = 0L;
     }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof com.mwojnar.gen.UserInfo) {
-        return mergeFrom((com.mwojnar.gen.UserInfo)other);
+      if (other instanceof com.mwojnar.gen.ServerInfo) {
+        return mergeFrom((com.mwojnar.gen.ServerInfo)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(com.mwojnar.gen.UserInfo other) {
-      if (other == com.mwojnar.gen.UserInfo.getDefaultInstance()) return this;
-      if (other.getUserId() != 0L) {
-        setUserId(other.getUserId());
+    public Builder mergeFrom(com.mwojnar.gen.ServerInfo other) {
+      if (other == com.mwojnar.gen.ServerInfo.getDefaultInstance()) return this;
+      if (other.getTime() != 0L) {
+        setTime(other.getTime());
       }
-      if (other.getGroupId() != 0L) {
-        setGroupId(other.getGroupId());
-      }
-      if (other.hasAckId()) {
-        setAckId(other.getAckId());
+      if (other.getClientAckId() != 0L) {
+        setClientAckId(other.getClientAckId());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -474,11 +419,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      com.mwojnar.gen.UserInfo parsedMessage = null;
+      com.mwojnar.gen.ServerInfo parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (com.mwojnar.gen.UserInfo) e.getUnfinishedMessage();
+        parsedMessage = (com.mwojnar.gen.ServerInfo) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -487,105 +432,65 @@ private static final long serialVersionUID = 0L;
       }
       return this;
     }
-    private int bitField0_;
 
-    private long userId_ ;
+    private long time_ ;
     /**
-     * <code>uint64 userId = 1;</code>
-     * @return The userId.
+     * <code>uint64 time = 1;</code>
+     * @return The time.
      */
     @java.lang.Override
-    public long getUserId() {
-      return userId_;
+    public long getTime() {
+      return time_;
     }
     /**
-     * <code>uint64 userId = 1;</code>
-     * @param value The userId to set.
+     * <code>uint64 time = 1;</code>
+     * @param value The time to set.
      * @return This builder for chaining.
      */
-    public Builder setUserId(long value) {
+    public Builder setTime(long value) {
       
-      userId_ = value;
+      time_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>uint64 userId = 1;</code>
+     * <code>uint64 time = 1;</code>
      * @return This builder for chaining.
      */
-    public Builder clearUserId() {
+    public Builder clearTime() {
       
-      userId_ = 0L;
-      onChanged();
-      return this;
-    }
-
-    private long groupId_ ;
-    /**
-     * <code>uint64 groupId = 2;</code>
-     * @return The groupId.
-     */
-    @java.lang.Override
-    public long getGroupId() {
-      return groupId_;
-    }
-    /**
-     * <code>uint64 groupId = 2;</code>
-     * @param value The groupId to set.
-     * @return This builder for chaining.
-     */
-    public Builder setGroupId(long value) {
-      
-      groupId_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>uint64 groupId = 2;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearGroupId() {
-      
-      groupId_ = 0L;
+      time_ = 0L;
       onChanged();
       return this;
     }
 
-    private long ackId_ ;
+    private long clientAckId_ ;
     /**
-     * <code>optional uint64 ackId = 3;</code>
-     * @return Whether the ackId field is set.
+     * <code>uint64 clientAckId = 2;</code>
+     * @return The clientAckId.
      */
     @java.lang.Override
-    public boolean hasAckId() {
-      return ((bitField0_ & 0x00000001) != 0);
+    public long getClientAckId() {
+      return clientAckId_;
     }
     /**
-     * <code>optional uint64 ackId = 3;</code>
-     * @return The ackId.
-     */
-    @java.lang.Override
-    public long getAckId() {
-      return ackId_;
-    }
-    /**
-     * <code>optional uint64 ackId = 3;</code>
-     * @param value The ackId to set.
+     * <code>uint64 clientAckId = 2;</code>
+     * @param value The clientAckId to set.
      * @return This builder for chaining.
      */
-    public Builder setAckId(long value) {
-      bitField0_ |= 0x00000001;
-      ackId_ = value;
+    public Builder setClientAckId(long value) {
+      
+      clientAckId_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>optional uint64 ackId = 3;</code>
+     * <code>uint64 clientAckId = 2;</code>
      * @return This builder for chaining.
      */
-    public Builder clearAckId() {
-      bitField0_ = (bitField0_ & ~0x00000001);
-      ackId_ = 0L;
+    public Builder clearClientAckId() {
+      
+      clientAckId_ = 0L;
       onChanged();
       return this;
     }
@@ -602,41 +507,41 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:chat.UserInfo)
+    // @@protoc_insertion_point(builder_scope:chat.ServerInfo)
   }
 
-  // @@protoc_insertion_point(class_scope:chat.UserInfo)
-  private static final com.mwojnar.gen.UserInfo DEFAULT_INSTANCE;
+  // @@protoc_insertion_point(class_scope:chat.ServerInfo)
+  private static final com.mwojnar.gen.ServerInfo DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new com.mwojnar.gen.UserInfo();
+    DEFAULT_INSTANCE = new com.mwojnar.gen.ServerInfo();
   }
 
-  public static com.mwojnar.gen.UserInfo getDefaultInstance() {
+  public static com.mwojnar.gen.ServerInfo getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
-  private static final com.google.protobuf.Parser<UserInfo>
-      PARSER = new com.google.protobuf.AbstractParser<UserInfo>() {
+  private static final com.google.protobuf.Parser<ServerInfo>
+      PARSER = new com.google.protobuf.AbstractParser<ServerInfo>() {
     @java.lang.Override
-    public UserInfo parsePartialFrom(
+    public ServerInfo parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new UserInfo(input, extensionRegistry);
+      return new ServerInfo(input, extensionRegistry);
     }
   };
 
-  public static com.google.protobuf.Parser<UserInfo> parser() {
+  public static com.google.protobuf.Parser<ServerInfo> parser() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.google.protobuf.Parser<UserInfo> getParserForType() {
+  public com.google.protobuf.Parser<ServerInfo> getParserForType() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.mwojnar.gen.UserInfo getDefaultInstanceForType() {
+  public com.mwojnar.gen.ServerInfo getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

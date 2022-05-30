@@ -17,24 +17,29 @@ message Message {
   optional uint64 id = 1;
   optional uint64 replyId = 2;
   optional uint64 ackId = 3;
-  optional uint64 userId = 4;
+  uint64 userId = 4;
   Priority priority = 5;
   string text = 6;
-  optional uint64 time = 7;
+  uint64 time = 7;
   optional bytes media = 8;
   optional string mime = 9;
 }
 
 message UserInfo {
-  optional uint64 userId = 1;
-  optional uint64 groupId = 2;
+  uint64 userId = 1;
+  uint64 groupId = 2;
   optional uint64 ackId = 3;
+}
+
+message ServerInfo {
+  uint64 time = 1;
+  uint64 clientAckId = 2;
 }
 
 message Empty{
 }
 
 service Chat {
-  rpc SendMessage(stream Message) returns (Empty) {}
-  rpc Join(UserInfo) returns (stream Message) {}
+  rpc Join(UserInfo) returns (ServerInfo) {}
+  rpc MessagesStream(stream Message) returns (stream Message) {}
 }

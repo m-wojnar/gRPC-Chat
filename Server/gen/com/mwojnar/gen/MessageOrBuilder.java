@@ -41,12 +41,7 @@ public interface MessageOrBuilder extends
   long getAckId();
 
   /**
-   * <code>optional uint64 userId = 4;</code>
-   * @return Whether the userId field is set.
-   */
-  boolean hasUserId();
-  /**
-   * <code>optional uint64 userId = 4;</code>
+   * <code>uint64 userId = 4;</code>
    * @return The userId.
    */
   long getUserId();
@@ -75,12 +70,7 @@ public interface MessageOrBuilder extends
       getTextBytes();
 
   /**
-   * <code>optional uint64 time = 7;</code>
-   * @return Whether the time field is set.
-   */
-  boolean hasTime();
-  /**
-   * <code>optional uint64 time = 7;</code>
+   * <code>uint64 time = 7;</code>
    * @return The time.
    */
   long getTime();
