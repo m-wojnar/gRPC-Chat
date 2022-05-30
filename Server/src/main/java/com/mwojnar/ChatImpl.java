@@ -10,10 +10,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class ChatImpl extends ChatGrpc.ChatImplBase {
@@ -28,13 +25,7 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
     }
 
     @Override
-    public void join(UserInfo request, StreamObserver<Message> responseObserver) {
-        if (!request.hasUserId() || !request.hasGroupId()) {
-            logger.warning("Join request didn't provide userId or groupId.");
-            responseObserver.onError(new StatusRuntimeException(Status.INVALID_ARGUMENT.withDescription("Join request must provide userId and groupId.")));
-            return;
-        }
-
+    public void join(UserInfo request, StreamObserver<ServerInfo> responseObserver) {
         try {
             createGroupIfNotExists(request.getGroupId());
         } catch (SQLException e) {
@@ -46,41 +37,26 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
         long ackId;
         try {
             ackId = insertOrUpdateUser(request.getUserId(), request.getGroupId(), request.hasAckId() ? request.getAckId() : null);
-            logger.info("User " + request.getUserId() + " joined successfully.");
         } catch (SQLException e) {
             logger.warning("Couldn't insert or update user => user " + request.getUserId() + " join rejected.");
             responseObserver.onError(new StatusRuntimeException(Status.ABORTED.withDescription("Couldn't insert or update user.")));
             return;
         }
 
-        List<Message> missingMessages;
-        try {
-            missingMessages = getMissingMessages(request.getGroupId(), ackId);
-        } catch (SQLException | IOException e) {
-            logger.warning("Couldn't find missing messages for user " + request.getUserId() + ".");
-            missingMessages = new LinkedList<>();
-        }
-
         long lastTime;
         try {
             lastTime = getLastTime(request.getUserId());
         } catch (SQLException e) {
-            logger.warning("Couldn't find last messages for user " + request.getUserId() + ".");
             lastTime = System.currentTimeMillis() / 1000;
         }
 
-        if (!missingMessages.isEmpty()) {
-            missingMessages.forEach(responseObserver::onNext);
-            logger.info(String.format("%d missing messages send to user %d.", missingMessages.size(), request.getUserId()));
-        } else {
-            var response = Message.newBuilder()
-                    .setTime(lastTime)
-                    .setAckId(ackId)
-                    .build();
-            responseObserver.onNext(response);
-        }
+        var response = ServerInfo.newBuilder()
+                .setTime(lastTime)
+                .setClientAckId(ackId)
+                .build();
 
-        observers.put(request.getUserId(), responseObserver);
+        logger.info("User " + request.getUserId() + " joined successfully.");
+        responseObserver.onNext(response);
     }
 
     private void createGroupIfNotExists(long groupId) throws SQLException {
@@ -101,43 +77,8 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
             ackId = resultSet.getLong(1);
         }
 
-        statement.executeUpdate(String.format("INSERT OR REPLACE INTO users VALUES(%d, %d, %d)", userId, groupId, ackId));
+        statement.executeUpdate("INSERT OR REPLACE INTO users VALUES(" + userId + "," + groupId + "," + ackId + ")");
         return ackId;
-    }
-
-    private List<Message> getMissingMessages(long groupId, long ackId) throws SQLException, IOException {
-        var statement = connection.createStatement();
-        var ackResult = statement.executeQuery("SELECT COALESCE(MAX(message_id), 0) FROM messages WHERE group_id == " + groupId);
-        var serverAckId = ackResult.getLong(1);
-
-        var resultsSet = statement.executeQuery(String.format("SELECT * FROM messages WHERE group_id == %d AND message_id > %d", groupId, ackId));
-        var list = new LinkedList<Message>();
-
-        while (resultsSet.next()) {
-            var message = Message.newBuilder()
-                    .setId(resultsSet.getLong("message_id"))
-                    .setAckId(serverAckId)
-                    .setUserId(resultsSet.getLong("user_id"))
-                    .setPriority(Priority.forNumber(resultsSet.getInt("priority")))
-                    .setText(resultsSet.getString("text"))
-                    .setTime(resultsSet.getLong("time"));
-
-            var replyId = resultsSet.getLong("reply_id");
-            if (!resultsSet.wasNull()) {
-                message.setReplyId(replyId);
-            }
-
-            var mime = resultsSet.getString("mime");
-            var media = resultsSet.getBlob("media");
-            if (!resultsSet.wasNull()) {
-                message.setMime(mime);
-                message.setMedia(ByteString.readFrom(media.getBinaryStream()));
-            }
-
-            list.add(message.build());
-        }
-
-        return list;
     }
 
     private long getLastTime(long userId) throws SQLException {
@@ -147,24 +88,30 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
     }
 
     @Override
-    public StreamObserver<Message> sendMessage(StreamObserver<Empty> responseObserver) {
+    public StreamObserver<Message> messagesStream(StreamObserver<Message> responseObserver) {
         return new StreamObserver<>() {
-            private Long userId = null;
-            private Long groupId = null;
+            private long userId;
+            private long groupId;
+            private boolean first = true;
 
             @Override
             public void onNext(Message message) {
-                if (!message.hasUserId()) {
-                    logger.warning("Message didn't provide userId.");
-                    return;
+                if (first) {
+                    try {
+                        init(message.getUserId(), responseObserver);
+                    } catch (SQLException | IOException e) {
+                        logger.warning("Couldn't init user connection => user " + message.getUserId() + " init rejected.");
+                        responseObserver.onError(new StatusRuntimeException(Status.ABORTED.withDescription("Couldn't init user.")));
+                        return;
+                    }
                 }
 
                 long newMessageId;
                 try {
-                    userId = userId == null ? message.getUserId() : userId;
                     newMessageId = saveMessage(message);
                 } catch (SQLException e) {
                     logger.warning("Couldn't save new message from user " + message.getUserId() + ".");
+                    responseObserver.onError(new StatusRuntimeException(Status.ABORTED.withDescription("Couldn't save new message.")));
                     return;
                 }
 
@@ -193,27 +140,63 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
                             entry.getValue().onNext(response);
                         } catch (StatusRuntimeException e) {
                             logger.warning("Couldn't deliver message to user " + entry.getKey() + " => removing user.");
-                            observers.remove(entry.getKey());
+                            entry.getValue().onError(new StatusRuntimeException(Status.ABORTED.withDescription("Couldn't deliver new message.")));
+                            removeUser(entry.getKey());
                         }
                     }
                 }
 
-                logger.info(String.format("Received message %d from user %d and sent to other users.", newMessageId, message.getUserId()));
+                logger.info("Received message " + newMessageId + " from user " + userId + " and sent to other users.");
+            }
+
+            private void init(long userId, StreamObserver<Message> responseObserver) throws SQLException, IOException {
+                this.first = false;
+                this.userId = userId;
+
+                var statement = connection.createStatement();
+                var resultSet = statement.executeQuery("SELECT group_id, ack_id FROM users WHERE user_id == " + userId);
+
+                this.groupId = resultSet.getLong(1);
+                sendMissingMessages(this.groupId, resultSet.getLong(2), responseObserver);
+            }
+
+            private void sendMissingMessages(long groupId, long ackId, StreamObserver<Message> responseObserver) throws SQLException, IOException {
+                var statement = connection.createStatement();
+                var ackResultSet = statement.executeQuery("SELECT COALESCE(MAX(message_id), 0) FROM messages WHERE group_id == " + groupId);
+                var serverAckId = ackResultSet.getLong(1);
+
+                var resultsSet = statement.executeQuery("SELECT * FROM messages WHERE group_id == " + groupId + " AND message_id > " + ackId);
+                while (resultsSet.next()) {
+                    var message = Message.newBuilder()
+                            .setId(resultsSet.getLong("message_id"))
+                            .setAckId(serverAckId)
+                            .setUserId(resultsSet.getLong("user_id"))
+                            .setPriority(Priority.forNumber(resultsSet.getInt("priority")))
+                            .setText(resultsSet.getString("text"))
+                            .setTime(resultsSet.getLong("time"));
+
+                    var replyId = resultsSet.getLong("reply_id");
+                    if (!resultsSet.wasNull()) {
+                        message.setReplyId(replyId);
+                    }
+
+                    var mime = resultsSet.getString("mime");
+                    var media = resultsSet.getBlob("media");
+                    if (!resultsSet.wasNull()) {
+                        message.setMime(mime);
+                        message.setMedia(ByteString.readFrom(media.getBinaryStream()));
+                    }
+
+                    responseObserver.onNext(message.build());
+                }
             }
 
             private long saveMessage(Message message) throws SQLException {
                 var statement = connection.createStatement();
-                var groupResult = statement.executeQuery("SELECT group_id FROM users WHERE user_id == " + message.getUserId());
-                groupId = groupResult.getLong(1);
-
-                if (groupResult.wasNull()) {
-                    throw new SQLException();
-                }
-
                 var idResult = statement.executeQuery("SELECT COALESCE(MAX(message_id), 0) FROM messages WHERE group_id == " + groupId);
                 var newMessageId = idResult.getLong(1) + 1;
 
-                statement.executeUpdate(String.format("UPDATE users SET ack_id = %d WHERE user_id == %d", message.getAckId(), userId));
+                statement.executeUpdate("UPDATE users SET ack_id = " + message.getAckId() + " WHERE user_id == " + userId);
                 removeOldMessages(groupId);
 
                 var preparedStatement = connection.prepareStatement("INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -226,16 +209,14 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
 
                 if (message.hasReplyId()) {
                     preparedStatement.setLong(2, message.getReplyId());
-                }
-                else {
+                } else {
                     preparedStatement.setNull(2, Types.NULL);
                 }
 
                 if (message.hasMedia() && message.hasMime()) {
                     preparedStatement.setBytes(8, message.getMedia().toByteArray());
                     preparedStatement.setString(9, message.getMime());
-                }
-                else {
+                } else {
                     preparedStatement.setNull(8, Types.NULL);
                     preparedStatement.setNull(9, Types.NULL);
                 }
@@ -248,7 +229,7 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
                 var statement = connection.createStatement();
                 var resultSet = statement.executeQuery("SELECT MIN(ack_id) FROM users WHERE group_id == " + groupId);
                 var ackId = resultSet.getLong(1);
-                statement.executeUpdate(String.format("DELETE FROM messages WHERE group_id == %d AND message_id <= %d", groupId, ackId));
+                statement.executeUpdate("DELETE FROM messages WHERE group_id == " + groupId + " AND message_id <= " + ackId);
             }
 
             @Override
@@ -258,31 +239,26 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
 
             @Override
             public void onCompleted() {
-                if (userId == null || groupId == null) {
-                    return;
-                }
-
                 observers.get(userId).onCompleted();
-                observers.remove(userId);
-
-                try {
-                    removeUser(userId);
-                } catch (SQLException e) {
-                    logger.warning("Couldn't remove user " + userId + ".");
-                }
+                removeUser(userId);
 
                 try {
                     removeOldMessages(groupId);
                 } catch (SQLException e) {
                     logger.warning("Couldn't remove old messages from group " + groupId + ".");
                 }
-
-                logger.info("User " + userId + " disconnected.");
             }
 
-            private void removeUser(long userId) throws SQLException {
-                var statement = connection.createStatement();
-                statement.executeUpdate("DELETE FROM users WHERE user_id == " + userId);
+            private void removeUser(long userId) {
+                try {
+                    var statement = connection.createStatement();
+                    statement.executeUpdate("DELETE FROM users WHERE user_id == " + userId);
+                } catch (SQLException e) {
+                    logger.warning("Couldn't remove user " + userId + " from database.");
+                }
+
+                observers.remove(userId);
+                logger.info("User " + userId + " disconnected.");
             }
         };
     }
