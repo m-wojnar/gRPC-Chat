@@ -95,7 +95,7 @@ public object MessageKt {
     }
 
     /**
-     * <code>optional uint64 userId = 4;</code>
+     * <code>uint64 userId = 4;</code>
      */
     public var userId: kotlin.Long
       @JvmName("getUserId")
@@ -105,17 +105,10 @@ public object MessageKt {
         _builder.setUserId(value)
       }
     /**
-     * <code>optional uint64 userId = 4;</code>
+     * <code>uint64 userId = 4;</code>
      */
     public fun clearUserId() {
       _builder.clearUserId()
-    }
-    /**
-     * <code>optional uint64 userId = 4;</code>
-     * @return Whether the userId field is set.
-     */
-    public fun hasUserId(): kotlin.Boolean {
-      return _builder.hasUserId()
     }
 
     /**
@@ -153,7 +146,7 @@ public object MessageKt {
     }
 
     /**
-     * <code>optional uint64 time = 7;</code>
+     * <code>uint64 time = 7;</code>
      */
     public var time: kotlin.Long
       @JvmName("getTime")
@@ -163,17 +156,10 @@ public object MessageKt {
         _builder.setTime(value)
       }
     /**
-     * <code>optional uint64 time = 7;</code>
+     * <code>uint64 time = 7;</code>
      */
     public fun clearTime() {
       _builder.clearTime()
-    }
-    /**
-     * <code>optional uint64 time = 7;</code>
-     * @return Whether the time field is set.
-     */
-    public fun hasTime(): kotlin.Boolean {
-      return _builder.hasTime()
     }
 
     /**

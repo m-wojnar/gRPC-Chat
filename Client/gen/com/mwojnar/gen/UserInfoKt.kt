@@ -23,7 +23,7 @@ public object UserInfoKt {
     internal fun _build(): com.mwojnar.gen.UserInfo = _builder.build()
 
     /**
-     * <code>optional uint64 userId = 1;</code>
+     * <code>uint64 userId = 1;</code>
      */
     public var userId: kotlin.Long
       @JvmName("getUserId")
@@ -33,21 +33,14 @@ public object UserInfoKt {
         _builder.setUserId(value)
       }
     /**
-     * <code>optional uint64 userId = 1;</code>
+     * <code>uint64 userId = 1;</code>
      */
     public fun clearUserId() {
       _builder.clearUserId()
     }
-    /**
-     * <code>optional uint64 userId = 1;</code>
-     * @return Whether the userId field is set.
-     */
-    public fun hasUserId(): kotlin.Boolean {
-      return _builder.hasUserId()
-    }
 
     /**
-     * <code>optional uint64 groupId = 2;</code>
+     * <code>uint64 groupId = 2;</code>
      */
     public var groupId: kotlin.Long
       @JvmName("getGroupId")
@@ -57,17 +50,10 @@ public object UserInfoKt {
         _builder.setGroupId(value)
       }
     /**
-     * <code>optional uint64 groupId = 2;</code>
+     * <code>uint64 groupId = 2;</code>
      */
     public fun clearGroupId() {
       _builder.clearGroupId()
-    }
-    /**
-     * <code>optional uint64 groupId = 2;</code>
-     * @return Whether the groupId field is set.
-     */
-    public fun hasGroupId(): kotlin.Boolean {
-      return _builder.hasGroupId()
     }
 
     /**

@@ -14,10 +14,10 @@ import io.grpc.Status.UNIMPLEMENTED
 import io.grpc.StatusException
 import io.grpc.kotlin.AbstractCoroutineServerImpl
 import io.grpc.kotlin.AbstractCoroutineStub
-import io.grpc.kotlin.ClientCalls.clientStreamingRpc
-import io.grpc.kotlin.ClientCalls.serverStreamingRpc
-import io.grpc.kotlin.ServerCalls.clientStreamingServerMethodDefinition
-import io.grpc.kotlin.ServerCalls.serverStreamingServerMethodDefinition
+import io.grpc.kotlin.ClientCalls.bidiStreamingRpc
+import io.grpc.kotlin.ClientCalls.unaryRpc
+import io.grpc.kotlin.ServerCalls.bidiStreamingServerMethodDefinition
+import io.grpc.kotlin.ServerCalls.unaryServerMethodDefinition
 import io.grpc.kotlin.StubFor
 import kotlin.String
 import kotlin.coroutines.CoroutineContext
@@ -36,13 +36,13 @@ object ChatGrpcKt {
   val serviceDescriptor: ServiceDescriptor
     get() = ChatGrpc.getServiceDescriptor()
 
-  val sendMessageMethod: MethodDescriptor<Message, Empty>
-    @JvmStatic
-    get() = ChatGrpc.getSendMessageMethod()
-
-  val joinMethod: MethodDescriptor<UserInfo, Message>
+  val joinMethod: MethodDescriptor<UserInfo, ServerInfo>
     @JvmStatic
     get() = ChatGrpc.getJoinMethod()
+
+  val messagesStreamMethod: MethodDescriptor<Message, Message>
+    @JvmStatic
+    get() = ChatGrpc.getMessagesStreamMethod()
 
   /**
    * A stub for issuing RPCs to a(n) chat.Chat service as suspending coroutines.
@@ -61,23 +61,16 @@ object ChatGrpcKt {
      * [StatusException] is thrown.  If this coroutine is cancelled, the RPC is also cancelled
      * with the corresponding exception as a cause.
      *
-     * This function collects the [Flow] of requests.  If the server terminates the RPC
-     * for any reason before collection of requests is complete, the collection of requests
-     * will be cancelled.  If the collection of requests completes exceptionally for any other
-     * reason, the RPC will be cancelled for that reason and this method will throw that
-     * exception.
-     *
-     * @param requests A [Flow] of request messages.
+     * @param request The request message to send to the server.
      *
      * @param headers Metadata to attach to the request.  Most users will not need this.
      *
      * @return The single response from the server.
      */
-    suspend fun sendMessage(requests: Flow<Message>, headers: Metadata = Metadata()): Empty =
-        clientStreamingRpc(
+    suspend fun join(request: UserInfo, headers: Metadata = Metadata()): ServerInfo = unaryRpc(
       channel,
-      ChatGrpc.getSendMessageMethod(),
-      requests,
+      ChatGrpc.getJoinMethod(),
+      request,
       callOptions,
       headers
     )
@@ -88,16 +81,24 @@ object ChatGrpcKt {
      * collecting the flow downstream fails exceptionally (including via cancellation), the RPC
      * is cancelled with that exception as a cause.
      *
-     * @param request The request message to send to the server.
+     * The [Flow] of requests is collected once each time the [Flow] of responses is
+     * collected. If collection of the [Flow] of responses completes normally or
+     * exceptionally before collection of `requests` completes, the collection of
+     * `requests` is cancelled.  If the collection of `requests` completes
+     * exceptionally for any other reason, then the collection of the [Flow] of responses
+     * completes exceptionally for the same reason and the RPC is cancelled with that reason.
+     *
+     * @param requests A [Flow] of request messages.
      *
      * @param headers Metadata to attach to the request.  Most users will not need this.
      *
      * @return A flow that, when collected, emits the responses from the server.
      */
-    fun join(request: UserInfo, headers: Metadata = Metadata()): Flow<Message> = serverStreamingRpc(
+    fun messagesStream(requests: Flow<Message>, headers: Metadata = Metadata()): Flow<Message> =
+        bidiStreamingRpc(
       channel,
-      ChatGrpc.getJoinMethod(),
-      request,
+      ChatGrpc.getMessagesStreamMethod(),
+      requests,
       callOptions,
       headers
     )}
@@ -109,7 +110,7 @@ object ChatGrpcKt {
     coroutineContext: CoroutineContext = EmptyCoroutineContext
   ) : AbstractCoroutineServerImpl(coroutineContext) {
     /**
-     * Returns the response to an RPC for chat.Chat.SendMessage.
+     * Returns the response to an RPC for chat.Chat.Join.
      *
      * If this method fails with a [StatusException], the RPC will fail with the corresponding
      * [Status].  If this method fails with a [java.util.concurrent.CancellationException], the RPC
@@ -117,16 +118,13 @@ object ChatGrpcKt {
      * with status `Status.CANCELLED`.  If this method fails for any other reason, the RPC will
      * fail with `Status.UNKNOWN` with the exception as a cause.
      *
-     * @param requests A [Flow] of requests from the client.  This flow can be
-     *        collected only once and throws [java.lang.IllegalStateException] on attempts to
-     * collect
-     *        it more than once.
+     * @param request The request from the client.
      */
-    open suspend fun sendMessage(requests: Flow<Message>): Empty = throw
-        StatusException(UNIMPLEMENTED.withDescription("Method chat.Chat.SendMessage is unimplemented"))
+    open suspend fun join(request: UserInfo): ServerInfo = throw
+        StatusException(UNIMPLEMENTED.withDescription("Method chat.Chat.Join is unimplemented"))
 
     /**
-     * Returns a [Flow] of responses to an RPC for chat.Chat.Join.
+     * Returns a [Flow] of responses to an RPC for chat.Chat.MessagesStream.
      *
      * If creating or collecting the returned flow fails with a [StatusException], the RPC
      * will fail with the corresponding [Status].  If it fails with a
@@ -135,21 +133,24 @@ object ChatGrpcKt {
      * or collecting the returned flow fails for any other reason, the RPC will fail with
      * `Status.UNKNOWN` with the exception as a cause.
      *
-     * @param request The request from the client.
+     * @param requests A [Flow] of requests from the client.  This flow can be
+     *        collected only once and throws [java.lang.IllegalStateException] on attempts to
+     * collect
+     *        it more than once.
      */
-    open fun join(request: UserInfo): Flow<Message> = throw
-        StatusException(UNIMPLEMENTED.withDescription("Method chat.Chat.Join is unimplemented"))
+    open fun messagesStream(requests: Flow<Message>): Flow<Message> = throw
+        StatusException(UNIMPLEMENTED.withDescription("Method chat.Chat.MessagesStream is unimplemented"))
 
     final override fun bindService(): ServerServiceDefinition = builder(getServiceDescriptor())
-      .addMethod(clientStreamingServerMethodDefinition(
-      context = this.context,
-      descriptor = ChatGrpc.getSendMessageMethod(),
-      implementation = ::sendMessage
-    ))
-      .addMethod(serverStreamingServerMethodDefinition(
+      .addMethod(unaryServerMethodDefinition(
       context = this.context,
       descriptor = ChatGrpc.getJoinMethod(),
       implementation = ::join
+    ))
+      .addMethod(bidiStreamingServerMethodDefinition(
+      context = this.context,
+      descriptor = ChatGrpc.getMessagesStreamMethod(),
+      implementation = ::messagesStream
     )).build()
   }
 }
