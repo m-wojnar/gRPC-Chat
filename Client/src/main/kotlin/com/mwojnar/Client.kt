@@ -15,7 +15,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.serializer
@@ -26,8 +26,9 @@ import java.util.*
 class Client(userId: Long, groupId: Long) : Closeable {
     private val state: ClientState
     private val fileName: String
-    private val startSemaphore: Semaphore
-    private val missingMessagesSemaphore: Semaphore
+    private val newMessageMutex: Mutex
+    private var first: Boolean
+    private var end: Boolean
 
     init {
         fileName = "saved/client_${userId}_group_${groupId}"
@@ -38,50 +39,20 @@ class Client(userId: Long, groupId: Long) : Closeable {
             ClientState(userId, groupId, -1, LinkedList())
         }
 
-        startSemaphore = Semaphore(1)
-        missingMessagesSemaphore = Semaphore(1)
+        newMessageMutex = Mutex(true)
+        first = true
+        end = false
     }
 
     suspend fun start(stub: ChatGrpcKt.ChatCoroutineStub) {
-        startSemaphore.acquire()
-        missingMessagesSemaphore.acquire()
-
-        CoroutineScope(Dispatchers.Default).async { receiveMessages(stub) }
+        CoroutineScope(Dispatchers.Default).async { cliLoop() }
 
         var reconnect: Boolean
         do {
+            first = true
             reconnect = try {
-                stub.sendMessage(sendMessages())
-                false
-            } catch (e: io.grpc.StatusException) {
-                true
-            }
-        } while (reconnect)
-    }
-
-    override fun close() {
-        // TODO client never reaches this method
-        println("Client closed. Saving client state.")
-
-        synchronized(this) {
-            val bytes = ProtoBuf.encodeToByteArray(serializer(), state)
-            File(fileName).writeBytes(bytes)
-        }
-    }
-
-    private suspend fun receiveMessages(stub: ChatGrpcKt.ChatCoroutineStub) {
-        var reconnect: Boolean
-        do {
-            val userInfoBuilder = UserInfo.newBuilder()
-                .setUserId(state.userId)
-                .setGroupId(state.groupId)
-
-            if (state.ackId >= 0) {
-                userInfoBuilder.ackId = state.ackId
-            }
-
-            reconnect = try {
-                stub.join(userInfoBuilder.build()).collect { messagesHandler(it) }
+                join(stub)
+                messagesStream(stub)
                 false
             } catch (e: io.grpc.StatusException) {
                 println("Cannot connect to server. Reconnecting in 5 s...")
@@ -91,41 +62,55 @@ class Client(userId: Long, groupId: Long) : Closeable {
         } while (reconnect)
     }
 
-    private fun messagesHandler(message: Message) {
-        if (message.hasTime()) {
-            state.messages.removeIf { it.time <= message.time }
-        } else {
-            println("Cannot remove old messages.")
-        }
+    override fun close() {
+        println("Connection to server closed.")
 
-        if (!message.hasId()) {
-            if (state.ackId == -1L) {
-                state.ackId = message.ackId
-            } else {
-                missingMessagesSemaphore.release()
-            }
-
-            try {
-                startSemaphore.release()
-            } catch (_: java.lang.IllegalStateException) {
-            }
-
-            println("Client connected to server.")
-        } else if (message.hasAckId() && state.ackId < message.ackId) {
-            state.ackId = message.ackId
-            message.print()
+        synchronized(this) {
+            val bytes = ProtoBuf.encodeToByteArray(serializer(), state)
+            File(fileName).writeBytes(bytes)
+            println("Client state saved.")
         }
     }
 
-    private fun sendMessages(): Flow<Message> = flow {
-        startSemaphore.acquire()
+    private suspend fun join(stub: ChatGrpcKt.ChatCoroutineStub) {
+        val userInfoBuilder = UserInfo.newBuilder()
+            .setUserId(state.userId)
+            .setGroupId(state.groupId)
+
+        if (state.ackId >= 0) {
+            userInfoBuilder.ackId = state.ackId
+        }
+
+        val serverInfo = stub.join(userInfoBuilder.build())
+        state.ackId = serverInfo.clientAckId
+        state.messages.removeIf { it.time <= serverInfo.time }
+
+        println("Client connected to server")
+    }
+
+    private suspend fun messagesStream(stub: ChatGrpcKt.ChatCoroutineStub) {
+        stub.messagesStream(messagesFlow()).collect { it.print() }
+    }
+
+    private suspend fun messagesFlow(): Flow<Message> = flow {
+        if (first) {
+            first = false
+            state.messages.forEach { emit(it.toMessage(state)) }
+        }
 
         while (true) {
-            if (missingMessagesSemaphore.tryAcquire()) {
-                println("Send missing messages.")
-                state.messages.forEach { emit(it.toMessage(state)) }
-            }
+            newMessageMutex.lock()
 
+            if (end) {
+                return@flow
+            } else {
+                emit(state.messages.last().toMessage(state))
+            }
+        }
+    }
+
+    private fun cliLoop() {
+        while (true) {
             val input = readln()
             if (input.isEmpty()) {
                 continue
@@ -157,14 +142,18 @@ class Client(userId: Long, groupId: Long) : Closeable {
                             mime = mediaArray[0]
                             media = mediaArray[1]
                         }
-                        "X" -> return@flow
+                        "X" -> end = true
                     }
                 }
             }
 
-            val clientMessage = ClientMessage(replyId, priority, text, System.currentTimeMillis() / 1000, media, mime)
-            state.messages.push(clientMessage)
-            emit(clientMessage.toMessage(state))
+            if (!end) {
+                state.messages.push(ClientMessage(replyId, priority, text, System.currentTimeMillis() / 1000, media, mime))
+                newMessageMutex.unlock()
+            } else {
+                newMessageMutex.unlock()
+                return
+            }
         }
     }
 }
