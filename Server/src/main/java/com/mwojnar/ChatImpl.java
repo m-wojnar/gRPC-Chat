@@ -97,13 +97,15 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
             @Override
             public void onNext(Message message) {
                 if (first) {
+                    first = false;
                     try {
                         init(message.getUserId(), responseObserver);
+                        logger.info("Connected to user " + message.getUserId());
                     } catch (SQLException | IOException e) {
                         logger.warning("Couldn't init user connection => user " + message.getUserId() + " init rejected.");
                         responseObserver.onError(new StatusRuntimeException(Status.ABORTED.withDescription("Couldn't init user.")));
-                        return;
                     }
+                    return;
                 }
 
                 long newMessageId;
@@ -150,14 +152,14 @@ public class ChatImpl extends ChatGrpc.ChatImplBase {
             }
 
             private void init(long userId, StreamObserver<Message> responseObserver) throws SQLException, IOException {
-                this.first = false;
-                this.userId = userId;
-
                 var statement = connection.createStatement();
                 var resultSet = statement.executeQuery("SELECT group_id, ack_id FROM users WHERE user_id == " + userId);
 
+                this.userId = userId;
                 this.groupId = resultSet.getLong(1);
-                sendMissingMessages(this.groupId, resultSet.getLong(2), responseObserver);
+                var ackId = resultSet.getLong(2);
+
+                sendMissingMessages(this.groupId, ackId, responseObserver);
             }
 
             private void sendMissingMessages(long groupId, long ackId, StreamObserver<Message> responseObserver) throws SQLException, IOException {
