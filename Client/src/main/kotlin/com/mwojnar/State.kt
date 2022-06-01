@@ -2,7 +2,6 @@ package com.mwojnar
 
 import com.mwojnar.gen.Priority
 import kotlinx.serialization.Serializable
-import java.util.Deque
 
 @Serializable
 data class ClientMessage(
@@ -19,5 +18,5 @@ data class ClientState(
     val userId: Long,
     val groupId: Long,
     var ackId: Long,
-    val messages: Deque<ClientMessage>
+    val messages: ArrayList<ClientMessage>
 )

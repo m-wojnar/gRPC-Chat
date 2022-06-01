@@ -36,9 +36,6 @@ message ServerInfo {
   uint64 clientAckId = 2;
 }
 
-message Empty{
-}
-
 service Chat {
   rpc Join(UserInfo) returns (ServerInfo) {}
   rpc MessagesStream(stream Message) returns (stream Message) {}

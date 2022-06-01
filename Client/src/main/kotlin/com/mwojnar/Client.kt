@@ -11,19 +11,17 @@ import kotlinx.cli.default
 import kotlinx.cli.required
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.serializer
-import java.io.Closeable
 import java.io.File
-import java.util.*
 
-class Client(userId: Long, groupId: Long) : Closeable {
+class Client(userId: Long, groupId: Long) {
     private val state: ClientState
     private val fileName: String
     private val newMessageMutex: Mutex
@@ -36,7 +34,7 @@ class Client(userId: Long, groupId: Long) : Closeable {
             val bytes = File(fileName).readBytes()
             ProtoBuf.decodeFromByteArray(bytes)
         } else {
-            ClientState(userId, groupId, -1, LinkedList())
+            ClientState(userId, groupId, -1, ArrayList())
         }
 
         newMessageMutex = Mutex(true)
@@ -45,7 +43,10 @@ class Client(userId: Long, groupId: Long) : Closeable {
     }
 
     suspend fun start(stub: ChatGrpcKt.ChatCoroutineStub) {
-        CoroutineScope(Dispatchers.Default).async { cliLoop() }
+        println("User ID: ${state.userId}")
+        println("Group ID: ${state.groupId}\n")
+
+        CoroutineScope(Dispatchers.Default).launch { cliLoop() }
 
         var reconnect: Boolean
         do {
@@ -53,23 +54,14 @@ class Client(userId: Long, groupId: Long) : Closeable {
             reconnect = try {
                 join(stub)
                 messagesStream(stub)
+                println("Connection to server closed.")
                 false
             } catch (e: io.grpc.StatusException) {
                 println("Cannot connect to server. Reconnecting in 5 s...")
                 delay(5000)
                 true
             }
-        } while (reconnect)
-    }
-
-    override fun close() {
-        println("Connection to server closed.")
-
-        synchronized(this) {
-            val bytes = ProtoBuf.encodeToByteArray(serializer(), state)
-            File(fileName).writeBytes(bytes)
-            println("Client state saved.")
-        }
+        } while (!end && reconnect)
     }
 
     private suspend fun join(stub: ChatGrpcKt.ChatCoroutineStub) {
@@ -83,19 +75,46 @@ class Client(userId: Long, groupId: Long) : Closeable {
 
         val serverInfo = stub.join(userInfoBuilder.build())
         state.ackId = serverInfo.clientAckId
-        state.messages.removeIf { it.time <= serverInfo.time }
+        removeOldMessages(serverInfo.time)
+        saveState()
 
         println("Client connected to server")
     }
 
+    @Synchronized
+    private fun saveState() {
+        val bytes = ProtoBuf.encodeToByteArray(serializer(), state)
+        File(fileName).writeBytes(bytes)
+    }
+
     private suspend fun messagesStream(stub: ChatGrpcKt.ChatCoroutineStub) {
-        stub.messagesStream(messagesFlow()).collect { it.print() }
+        stub.messagesStream(messagesFlow()).collect {
+            it.print()
+
+            state.ackId = it.ackId
+            removeOldMessages(it.time)
+            saveState()
+        }
+    }
+
+    private fun removeOldMessages(time: Long) {
+        state.messages.removeIf { it.time <= time }
     }
 
     private suspend fun messagesFlow(): Flow<Message> = flow {
+        var lastMessageSend: ClientMessage? = null;
+
         if (first) {
             first = false
-            state.messages.forEach { emit(it.toMessage(state)) }
+            emit(Message.newBuilder().setUserId(state.userId).build())
+            state.messages.forEach {
+                try {
+                    emit(it.toMessage(state))
+                    lastMessageSend = it;
+                } catch (_: IllegalArgumentException) {
+                    println("Incorrect Base64 encoding of media.")
+                }
+            }
         }
 
         while (true) {
@@ -103,8 +122,16 @@ class Client(userId: Long, groupId: Long) : Closeable {
 
             if (end) {
                 return@flow
-            } else {
-                emit(state.messages.last().toMessage(state))
+            }
+
+            val newMessage = state.messages.last()
+            if (lastMessageSend == null || newMessage != lastMessageSend) {
+                try {
+                    emit(newMessage.toMessage(state))
+                    lastMessageSend = newMessage
+                } catch (_: IllegalArgumentException) {
+                    println("Incorrect Base64 encoding of media.")
+                }
             }
         }
     }
@@ -147,12 +174,16 @@ class Client(userId: Long, groupId: Long) : Closeable {
                 }
             }
 
-            if (!end) {
-                state.messages.push(ClientMessage(replyId, priority, text, System.currentTimeMillis() / 1000, media, mime))
-                newMessageMutex.unlock()
-            } else {
-                newMessageMutex.unlock()
-                return
+            try {
+                if (!end) {
+                    state.messages.add(ClientMessage(replyId, priority, text, System.currentTimeMillis() / 1000, media, mime))
+                    saveState()
+                    newMessageMutex.unlock()
+                } else {
+                    newMessageMutex.unlock()
+                    return
+                }
+            } catch (_: java.lang.IllegalStateException) {
             }
         }
     }
@@ -169,9 +200,8 @@ suspend fun main(args: Array<String>) {
     val channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build()
     val stub = ChatGrpcKt.ChatCoroutineStub(channel)
 
-    Client(userId.toLong(), groupId.toLong()).use {
-        it.start(stub)
-    }
+    val client = Client(userId.toLong(), groupId.toLong())
+    client.start(stub)
 
     channel.shutdown()
 }

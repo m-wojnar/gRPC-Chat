@@ -77,7 +77,7 @@ public class ChatServer {
                 """);
         statement.executeUpdate("""
                     CREATE TABLE IF NOT EXISTS messages (
-                        message_id  INTEGER PRIMARY KEY,
+                        message_id  INTEGER PRIMARY KEY AUTOINCREMENT,
                         reply_id    INTEGER,
                         user_id     INTEGER REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,
                         group_id    INTEGER REFERENCES groups (group_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL,

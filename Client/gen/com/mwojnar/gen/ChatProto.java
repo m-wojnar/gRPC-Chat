@@ -29,11 +29,6 @@ public final class ChatProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_chat_ServerInfo_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_chat_Empty_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_chat_Empty_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -52,12 +47,12 @@ public final class ChatProto {
       "dB\010\n\006_mediaB\007\n\005_mime\"I\n\010UserInfo\022\016\n\006user" +
       "Id\030\001 \001(\004\022\017\n\007groupId\030\002 \001(\004\022\022\n\005ackId\030\003 \001(\004" +
       "H\000\210\001\001B\010\n\006_ackId\"/\n\nServerInfo\022\014\n\004time\030\001 " +
-      "\001(\004\022\023\n\013clientAckId\030\002 \001(\004\"\007\n\005Empty*5\n\010Pri" +
-      "ority\022\010\n\004HIGH\020\000\022\n\n\006MEDIUM\020\001\022\n\n\006NORMAL\020\002\022" +
-      "\007\n\003LOW\020\0032h\n\004Chat\022*\n\004Join\022\016.chat.UserInfo" +
-      "\032\020.chat.ServerInfo\"\000\0224\n\016MessagesStream\022\r" +
-      ".chat.Message\032\r.chat.Message\"\000(\0010\001B\036\n\017co" +
-      "m.mwojnar.genB\tChatProtoP\001b\006proto3"
+      "\001(\004\022\023\n\013clientAckId\030\002 \001(\004*5\n\010Priority\022\010\n\004" +
+      "HIGH\020\000\022\n\n\006MEDIUM\020\001\022\n\n\006NORMAL\020\002\022\007\n\003LOW\020\0032" +
+      "h\n\004Chat\022*\n\004Join\022\016.chat.UserInfo\032\020.chat.S" +
+      "erverInfo\"\000\0224\n\016MessagesStream\022\r.chat.Mes" +
+      "sage\032\r.chat.Message\"\000(\0010\001B\036\n\017com.mwojnar" +
+      ".genB\tChatProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -81,12 +76,6 @@ public final class ChatProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_chat_ServerInfo_descriptor,
         new java.lang.String[] { "Time", "ClientAckId", });
-    internal_static_chat_Empty_descriptor =
-      getDescriptor().getMessageTypes().get(3);
-    internal_static_chat_Empty_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_chat_Empty_descriptor,
-        new java.lang.String[] { });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
